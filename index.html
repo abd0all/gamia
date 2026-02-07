@@ -126,6 +126,26 @@
             color: white;
         }
 
+        .sync-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .sync-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
         .user-avatar {
             width: 40px;
             height: 40px;
@@ -986,6 +1006,16 @@
                 <div class="logo"><img class="logo" src="logo association.jpeg" alt="logo"></div>
                 <h1 class="app-title">نظام إدارة جمعية تنمية المجتمع بالرحمانية</h1>
             </div>
+            <div class="user-info">
+                <button class="sync-btn" onclick="fetchFromCloud()" title="تحديث من السحاب">
+                    ☁️ مزامنة سحابية
+                </button>
+                <div class="user-avatar">AD</div>
+                <div class="user-details" style="color: white;">
+                    <div class="user-name" style="font-weight: 600;">مسؤول الجمعية</div>
+                    <div class="user-role" style="font-size: 0.8rem; opacity: 0.8;">لوحة التحكم</div>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -1517,6 +1547,9 @@
 
     <script>
         // Database Simulation
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwW6R-NTv8_y7MjeGn2yXrAomTwtWGj2MzGKfUZW-YOrwHTabC2lqJATEtbG1MieEc-dQ/exec';
+        let isSyncing = false;
+
         let database = {
             cases: [],
             distributions: [],
@@ -1562,9 +1595,88 @@
             }
         }
 
-        // Save data to localStorage
-        function saveData() {
+        // Save data to localStorage and Cloud
+        async function saveData() {
             localStorage.setItem('charityDB', JSON.stringify(database));
+            await syncToCloud();
+        }
+
+        // Cloud Synchronization Functions
+        async function syncToCloud() {
+            if (isSyncing) return;
+            showSyncStatus('syncing', 'جاري المزامنة السحابية...');
+            isSyncing = true;
+
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Google Apps Script requires no-cors for simple POST or it will redirect
+                    body: JSON.stringify({
+                        action: 'save',
+                        data: database
+                    })
+                });
+
+                // Since no-cors doesn't return response body, we assume success if no error
+                showSyncStatus('success', 'تمت المزامنة السحابية بنجاح ✅');
+                console.log("Cloud sync completed.");
+            } catch (error) {
+                console.error('Sync Error:', error);
+                showSyncStatus('error', 'فشل المزامنة السحابية ❌');
+            } finally {
+                isSyncing = false;
+                setTimeout(() => hideSyncStatus(), 3000);
+            }
+        }
+
+        async function fetchFromCloud() {
+            showSyncStatus('loading', 'جاري جلب البيانات من السحاب...');
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL);
+                const cloudData = await response.json();
+
+                if (cloudData && cloudData.cases) {
+                    database = cloudData;
+                    localStorage.setItem('charityDB', JSON.stringify(database));
+
+                    // Refresh UI
+                    updateDashboard();
+                    renderCasesTable();
+                    renderVotingTable();
+                    renderCategoriesSelect();
+                    renderAidTypeSelect();
+
+                    showAlert('success', '✅ تم تحديث البيانات من السحاب بنجاح');
+                }
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                showAlert('error', '❌ فشل جلب البيانات من السحاب');
+            } finally {
+                hideSyncStatus();
+            }
+        }
+
+        function showSyncStatus(type, message) {
+            let statusEl = document.getElementById('syncStatusIndicator');
+            if (!statusEl) {
+                statusEl = document.createElement('div');
+                statusEl.id = 'syncStatusIndicator';
+                statusEl.style.cssText = 'position:fixed; bottom:20px; left:20px; padding:10px 20px; background:white; border-radius:30px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:9999; font-size:0.9rem; display:flex; align-items:center; gap:8px; border:1px solid var(--primary-light); transition: all 0.3s ease;';
+                document.body.appendChild(statusEl);
+            }
+
+            const icon = type === 'syncing' ? '🔄' : (type === 'success' ? '✅' : (type === 'error' ? '❌' : '☁️'));
+            statusEl.innerHTML = `<span class="sync-icon">${icon}</span> ${message}`;
+            statusEl.style.transform = 'translateY(0)';
+            statusEl.style.opacity = '1';
+        }
+
+        function hideSyncStatus() {
+            const statusEl = document.getElementById('syncStatusIndicator');
+            if (statusEl) {
+                statusEl.style.transform = 'translateY(100px)';
+                statusEl.style.opacity = '0';
+            }
         }
 
         // Navigation

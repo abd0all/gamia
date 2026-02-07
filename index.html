@@ -1823,7 +1823,40 @@
                 const cloudData = await response.json();
 
                 if (cloudData && cloudData.cases) {
-                    database = cloudData;
+                    // --- SMART LOCAL MERGE ---
+                    // Instead of overwriting (database = cloudData), we merge to prevent losing local unsynced data
+
+                    // 1. Merge Cases
+                    cloudData.cases.forEach(cloudCase => {
+                        const existingIndex = database.cases.findIndex(c => c.id === cloudCase.id);
+                        if (existingIndex > -1) {
+                            // Update existing case with cloud data (cloud is truth for existing cases)
+                            database.cases[existingIndex] = cloudCase;
+                        } else {
+                            // Add new case from cloud
+                            database.cases.push(cloudCase);
+                        }
+                    });
+
+                    // 2. Merge Categories
+                    if (cloudData.categories) {
+                        cloudData.categories.forEach(cloudCat => {
+                            if (!database.categories.some(c => c.id === cloudCat.id)) {
+                                database.categories.push(cloudCat);
+                            }
+                        });
+                    }
+
+                    // 3. Merge Aid Types
+                    if (cloudData.aidTypes) {
+                        cloudData.aidTypes.forEach(type => {
+                            if (!database.aidTypes.includes(type)) {
+                                database.aidTypes.push(type);
+                            }
+                        });
+                    }
+
+                    // Save the merged result locally
                     localStorage.setItem('charityDB', JSON.stringify(database));
 
                     // Refresh UI
@@ -1833,7 +1866,7 @@
                     renderCategoriesSelect();
                     renderAidTypeSelect();
 
-                    showAlert('success', '✅ تم تحديث البيانات من السحاب بنجاح');
+                    showAlert('success', '✅ تم جلب البيانات وتحديثها بنجاح');
                 }
             } catch (error) {
                 console.error('Fetch Error:', error);

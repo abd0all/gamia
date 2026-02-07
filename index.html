@@ -578,6 +578,38 @@
             font-size: 0.85rem;
             font-weight: 600;
             display: inline-block;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .status-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-badge::after {
+            content: attr(data-hover);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            color: inherit;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .status-badge:hover::after {
+            opacity: 1;
         }
 
         .status-pending {
@@ -598,6 +630,55 @@
         .status-received {
             background: #d3f9d8;
             color: #2f9e44;
+        }
+
+        /* Pagination */
+        .pagination-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 1rem;
+            gap: 0.5rem;
+            background: var(--bg-card);
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .pagination-btn {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .pagination-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            margin-right: auto;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
 
         .status-not-received {
@@ -1083,8 +1164,15 @@
                 </div>
 
                 <div class="form-section">
-                    <h2 class="section-title">آخر الأنشطة</h2>
-                    <div id="recentActivities"></div>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h2 class="section-title" style="margin-bottom: 0;">📊 ملخص التوزيع الشهري</h2>
+                        <div class="form-group" style="margin-bottom: 0; min-width: 200px;">
+                            <input type="month" id="summaryMonth" class="form-input" onchange="renderMonthlySummary()"
+                                style="border-color: var(--primary);">
+                        </div>
+                    </div>
+                    <div id="monthlySummaryContainer"></div>
                 </div>
             </div>
 
@@ -1132,12 +1220,13 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="form-label required">حالة الأب</label>
-                                <select class="form-select" id="fatherStatus" required>
+                                <label class="form-label">حالة الأب</label>
+                                <select class="form-select" id="fatherStatus">
                                     <option value="">-- اختر الحالة --</option>
                                     <option value="present">موجود</option>
                                     <option value="absent">غائب</option>
                                     <option value="deceased">متوفى</option>
+                                    <option value="divorced">مطلق</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1226,6 +1315,7 @@
                             <tbody id="casesTableBody">
                             </tbody>
                         </table>
+                        <div id="casesPagination" class="pagination-container"></div>
                     </div>
                 </div>
             </div>
@@ -1233,7 +1323,19 @@
             <!-- Voting/Approval Page -->
             <div id="voting" class="page">
                 <div class="form-section">
-                    <h2 class="section-title">اعتماد الحالات المعلقة</h2>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                        <h2 class="section-title" style="margin-bottom: 0;">اعتماد الحالات المعلقة</h2>
+                        <div class="form-group" style="margin-bottom: 0; min-width: 250px;">
+                            <select class="form-select" id="approvalFilter"
+                                onchange="currentPageVoting=1; renderVotingTable();"
+                                style="border-color: var(--primary);">
+                                <option value="all">🔍 عرض الكل (أسر وأطفال)</option>
+                                <option value="case">🏠 عرض الأسر فقط</option>
+                                <option value="child">👶 عرض الأطفال فقط</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="table-container">
                         <table class="table">
                             <thead>
@@ -1249,6 +1351,7 @@
                             <tbody id="votingTableBody">
                             </tbody>
                         </table>
+                        <div id="votingPagination" class="pagination-container"></div>
                     </div>
                 </div>
 
@@ -1394,11 +1497,20 @@
                 <div class="form-section mt-3">
                     <h2 class="section-title">تسليم المساعدات</h2>
 
-                    <div class="form-group mb-3">
-                        <label class="form-label required">اختر المساعدة لتوزيعها</label>
-                        <select class="form-select" id="aidTypeSelect" onchange="renderDistributionLists()">
-                            <option value="">-- اختر نوع المساعدة --</option>
-                        </select>
+                    <div class="form-grid mb-3">
+                        <div class="form-group">
+                            <label class="form-label required">اختر المساعدة لتوزيعها</label>
+                            <select class="form-select" id="aidTypeSelect" onchange="renderDistributionLists()">
+                                <option value="">-- اختر نوع المساعدة --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">فئة المستفيدين</label>
+                            <select class="form-select" id="aidTargetType" onchange="renderDistributionLists()">
+                                <option value="case">صاحب الحالة (الأب/الأسرة)</option>
+                                <option value="child">بالأطفال (كل طفل مستقل)</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Not Received List -->
@@ -1425,6 +1537,7 @@
                                     <!-- Populated by JS -->
                                 </tbody>
                             </table>
+                            <div id="notReceivedPagination" class="pagination-container"></div>
                         </div>
 
                         <!-- Received List -->
@@ -1445,6 +1558,7 @@
                                     <!-- Populated by JS -->
                                 </tbody>
                             </table>
+                            <div id="receivedPagination" class="pagination-container"></div>
                         </div>
                     </div>
                 </div>
@@ -1566,6 +1680,75 @@
         let customFieldsCount = 0;
         let currentDistribution = null;
         let editingCaseId = null;
+
+        // Pagination State
+        const ITEMS_PER_PAGE = 10;
+        let currentPageCases = 1;
+        let currentPageVoting = 1;
+        let currentPageNotReceived = 1;
+        let currentPageReceived = 1;
+
+        function paginateResults(data, page) {
+            const start = (page - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            return {
+                items: data.slice(start, end),
+                totalItems: data.length,
+                totalPages: Math.ceil(data.length / ITEMS_PER_PAGE)
+            };
+        }
+
+        function renderPaginationControls(containerId, totalPages, currentPage, onPageChange) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'flex';
+            container.innerHTML = '';
+
+            // Previous button
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'pagination-btn';
+            prevBtn.innerHTML = '‹ السابقة';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => onPageChange(currentPage - 1);
+            container.appendChild(prevBtn);
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+                    pageBtn.textContent = i;
+                    pageBtn.onclick = () => onPageChange(i);
+                    container.appendChild(pageBtn);
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.style.padding = '0 0.5rem';
+                    container.appendChild(dots);
+                }
+            }
+
+            // Next button
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'pagination-btn';
+            nextBtn.innerHTML = 'التالية ›';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => onPageChange(currentPage + 1);
+            container.appendChild(nextBtn);
+
+            // Info span
+            const info = document.createElement('span');
+            info.className = 'pagination-info';
+            info.textContent = `صفحة ${currentPage} من ${totalPages}`;
+            container.appendChild(info);
+        }
 
         // Load data from localStorage
         function loadData() {
@@ -1881,12 +2064,20 @@
             document.querySelectorAll('.child-item').forEach(item => {
                 const nameSelect = item.querySelector('input[placeholder="اسم الطفل"]');
                 const birthSelect = item.querySelector('input[placeholder="تاريخ الميلاد"]');
-                // Check if element exists before reading value
                 const name = nameSelect ? nameSelect.value : '';
                 const birth = birthSelect ? birthSelect.value : '';
 
                 if (name && birth) {
-                    children.push({ name, birthDate: birth });
+                    // Try to preserve existing child status if editing
+                    let status = 'pending';
+                    if (editingCaseId) {
+                        const existingCase = database.cases.find(c => c.id === editingCaseId);
+                        if (existingCase && existingCase.children) {
+                            const existingChild = existingCase.children.find(c => c.name === name);
+                            if (existingChild) status = existingChild.status || 'pending';
+                        }
+                    }
+                    children.push({ name, birthDate: birth, status: status });
                 }
             });
 
@@ -1977,23 +2168,125 @@
                 database.cases.filter(c => c.status === 'pending').length;
             document.getElementById('approvedCases').textContent =
                 database.cases.filter(c => c.status === 'approved').length;
-            const totalDistributed = database.cases.reduce((sum, c) => sum + (c.receivedHistory ? c.receivedHistory.length : 0), 0);
-            document.getElementById('totalDistributions').textContent = totalDistributed;
+
+            // Count total distributions
+            let totalDist = 0;
+            database.cases.forEach(c => {
+                if (c.receivedHistory) totalDist += c.receivedHistory.length;
+                if (c.children) {
+                    c.children.forEach(child => {
+                        if (child.receivedHistory) totalDist += child.receivedHistory.length;
+                    });
+                }
+            });
+            document.getElementById('totalDistributions').textContent = totalDist;
+
+            // Update monthly summary
+            renderMonthlySummary();
+        }
+
+        function renderMonthlySummary() {
+            const monthInput = document.getElementById('summaryMonth');
+            if (!monthInput || !monthInput.value) {
+                // Initialize to current month if empty
+                const now = new Date();
+                const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                if (monthInput) monthInput.value = currentMonth;
+            }
+
+            const targetMonth = monthInput.value; // YYYY-MM
+            const container = document.getElementById('monthlySummaryContainer');
+            if (!container) return;
+
+            const summary = {}; // { "Food": 10, "Money": 5 }
+
+            database.cases.forEach(c => {
+                // Check parent history
+                if (c.receivedHistory) {
+                    c.receivedHistory.forEach(h => {
+                        const hMonth = h.date.substring(0, 7);
+                        if (hMonth === targetMonth) {
+                            summary[h.type] = (summary[h.type] || 0) + 1;
+                        }
+                    });
+                }
+                // Check children history
+                if (c.children) {
+                    c.children.forEach(child => {
+                        if (child.receivedHistory) {
+                            child.receivedHistory.forEach(h => {
+                                const hMonth = h.date.substring(0, 7);
+                                if (hMonth === targetMonth) {
+                                    summary[h.type] = (summary[h.type] || 0) + 1;
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            const aidTypes = Object.keys(summary);
+            if (aidTypes.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-secondary); background: var(--primary-light); border-radius: 12px;">
+                        <span style="font-size: 2rem; display: block; margin-bottom: 1rem;">📭</span>
+                        لا توجد عمليات توزيع مسجلة في هذا الشهر
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="stats-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+            `;
+
+            aidTypes.sort().forEach(type => {
+                html += `
+                    <div style="background: white; border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; transition: all 0.3s ease;">
+                        <div style="font-size: 1.5rem;">📦</div>
+                        <div style="font-weight: 700; color: var(--primary); font-size: 1.1rem;">${type}</div>
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--secondary);">${summary[type]} مستلم</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">خلال شهر ${targetMonth}</div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
         }
 
         // Render Cases Table
         function renderCasesTable() {
             const tbody = document.getElementById('casesTableBody');
-            tbody.innerHTML = '';
+            const searchTerm = document.getElementById('searchCases').value.toLowerCase();
 
-            database.cases.forEach(caseItem => {
+            // Filter Data
+            const filteredData = database.cases.filter(caseItem =>
+                caseItem.husbandName.toLowerCase().includes(searchTerm) ||
+                caseItem.husbandID.includes(searchTerm)
+            );
+
+            // Paginate
+            const { items, totalPages } = paginateResults(filteredData, currentPageCases);
+
+            tbody.innerHTML = '';
+            items.forEach(caseItem => {
                 const tr = document.createElement('tr');
+                const isApproved = caseItem.status === 'approved';
+                const hoverText = isApproved ? '❌ إلغاء الاعتماد' : '✅ اعتماد الآن';
+
                 tr.innerHTML = `
                     <td>${caseItem.husbandName}</td>
                     <td>${caseItem.husbandID}</td>
                     <td>${caseItem.children.length}</td>
                     <td>${caseItem.totalIncome} جنيه</td>
-                    <td><span class="status-badge status-${caseItem.status}">${getStatusText(caseItem.status)}</span></td>
+                    <td>
+                        <button class="status-badge status-${caseItem.status}" 
+                                data-hover="${hoverText}"
+                                onclick="toggleCaseStatus(${caseItem.id})">
+                            ${getStatusText(caseItem.status)}
+                        </button>
+                    </td>
                     <td>
                         <div class="action-buttons">
                             <button class="btn btn-edit btn-sm" onclick="editCase(${caseItem.id})">✏️</button>
@@ -2003,6 +2296,11 @@
                     </td>
                 `;
                 tbody.appendChild(tr);
+            });
+
+            renderPaginationControls('casesPagination', totalPages, currentPageCases, (newPage) => {
+                currentPageCases = newPage;
+                renderCasesTable();
             });
         }
 
@@ -2015,15 +2313,29 @@
             return statuses[status] || status;
         }
 
+        // Toggle Case Status
+        function toggleCaseStatus(id) {
+            const caseItem = database.cases.find(c => c.id === id);
+            if (!caseItem) return;
+
+            if (caseItem.status === 'approved') {
+                caseItem.status = 'pending';
+                showAlert('info', '🔄 تم سحب اعتماد الحالة');
+            } else {
+                caseItem.status = 'approved';
+                showAlert('success', '✅ تم اعتماد الحالة بنجاح');
+            }
+
+            saveData();
+            renderCasesTable();
+            renderVotingTable();
+            updateDashboard();
+        }
+
         // Search Cases
         document.getElementById('searchCases').addEventListener('input', function (e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('#casesTableBody tr');
-
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
+            currentPageCases = 1; // Reset to page 1 on search
+            renderCasesTable();
         });
 
         // View Case Details
@@ -2186,31 +2498,111 @@
         }
 
         // Approval System (Formerly Voting)
-        function renderVotingTable() { // Kept name for compatibility, now renders Approval Table
+        function renderVotingTable() {
             const tbody = document.getElementById('votingTableBody');
-            tbody.innerHTML = '';
+            const filterValue = document.getElementById('approvalFilter')?.value || 'all';
 
-            const pendingCases = database.cases.filter(c => c.status === 'pending');
+            // Collect all pending items (Cases and Children of approved cases)
+            let pendingItems = [];
 
-            if (pendingCases.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center">لا توجد حالات معلقة (قيد الانتظار)</td></tr>';
+            // 1. Pending Cases
+            if (filterValue === 'all' || filterValue === 'case') {
+                database.cases.filter(c => c.status === 'pending').forEach(c => {
+                    pendingItems.push({
+                        type: 'case',
+                        id: c.id,
+                        name: c.husbandName,
+                        idNumber: c.husbandID,
+                        childCount: c.children.length,
+                        income: c.totalIncome,
+                        original: c
+                    });
+                });
+            }
+
+            // 2. Pending Children of Approved Cases
+            if (filterValue === 'all' || filterValue === 'child') {
+                database.cases.filter(c => c.status === 'approved').forEach(c => {
+                    if (c.children) {
+                        c.children.filter(child => !child.status || child.status === 'pending').forEach(child => {
+                            pendingItems.push({
+                                type: 'child',
+                                caseId: c.id,
+                                childName: child.name,
+                                name: `👶 طفل: ${child.name}`,
+                                parentName: c.husbandName,
+                                idNumber: `${c.husbandID} (ولي الأمر)`,
+                                childCount: '-',
+                                income: c.totalIncome,
+                                original: child
+                            });
+                        });
+                    }
+                });
+            }
+
+            if (pendingItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">لا توجد حالات أو أطفال معلقين (قيد الانتظار)</td></tr>';
+                renderPaginationControls('votingPagination', 0, 1, () => { });
                 return;
             }
 
-            pendingCases.forEach(caseItem => {
+            const { items, totalPages } = paginateResults(pendingItems, currentPageVoting);
+
+            tbody.innerHTML = '';
+            items.forEach(item => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${caseItem.husbandName}</td>
-                    <td>${caseItem.husbandID}</td>
-                    <td>${caseItem.children.length}</td>
-                    <td>${caseItem.totalIncome} جنيه</td>
-                    <td><span class="status-badge status-pending">قيد الانتظار</span></td>
-                    <td>
-                        <button class="btn btn-success btn-sm" onclick="approveCase(${caseItem.id})">✅ اعتماد</button>
-                    </td>
-                `;
+                if (item.type === 'case') {
+                    tr.innerHTML = `
+                        <td>
+                            <div style="font-weight:600; color:var(--secondary);">🏠 ${item.name}</div>
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">أسرة مستقلة</div>
+                        </td>
+                        <td>${item.idNumber}</td>
+                        <td>${item.childCount}</td>
+                        <td>${item.income} جنيه</td>
+                        <td><span class="status-badge status-pending">قيد الانتظار</span></td>
+                        <td>
+                            <button class="btn btn-success btn-sm" onclick="approveCase(${item.id})">✅ اعتماد الأسرة</button>
+                        </td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td>
+                            <div style="font-weight:600; color:var(--primary);">👶 ${item.childName}</div>
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">ولي الأمر: ${item.parentName}</div>
+                        </td>
+                        <td>${item.idNumber}</td>
+                        <td>-</td>
+                        <td>${item.income} جنيه</td>
+                        <td><span class="status-badge status-pending">قيد الانتظار</span></td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="approveChild(${item.caseId}, '${item.childName}')">👶 اعتماد الطفل</button>
+                        </td>
+                    `;
+                }
                 tbody.appendChild(tr);
             });
+
+            renderPaginationControls('votingPagination', totalPages, currentPageVoting, (newPage) => {
+                currentPageVoting = newPage;
+                renderVotingTable();
+            });
+        }
+
+        function approveChild(caseId, childName) {
+            const caseItem = database.cases.find(c => c.id === caseId);
+            if (caseItem && caseItem.children) {
+                const child = caseItem.children.find(c => c.name === childName);
+                if (child) {
+                    if (confirm(`هل أنت متأكد من اعتماد الطفل "${childName}" كحالة مستقلة مستحقة؟`)) {
+                        child.status = 'approved';
+                        saveData();
+                        renderVotingTable();
+                        showAlert('success', `✅ تم اعتماد الطفل "${childName}" بنجاح`);
+                    }
+                }
+            }
         }
 
         function approveCase(id) {
@@ -2441,6 +2833,7 @@
             const selections = getSmartSelectionCandidates(count, method);
             selections.forEach(item => {
                 if (item.case) item.case.status = 'approved';
+                if (item.child) item.child.status = 'approved'; // Support individual child approval via smart selection
             });
 
             saveData();
@@ -2574,6 +2967,8 @@
 
         function renderDistributionLists() {
             const selectedType = document.getElementById('aidTypeSelect').value;
+            const targetType = document.getElementById('aidTargetType').value;
+            const searchTerm = document.getElementById('searchDistribution').value.toLowerCase();
             const container = document.getElementById('deliveryLists');
 
             if (!selectedType) {
@@ -2586,74 +2981,176 @@
             const notReceivedBody = document.getElementById('notReceivedTableBody');
             const receivedBody = document.getElementById('receivedTableBody');
 
-            notReceivedBody.innerHTML = '';
-            receivedBody.innerHTML = '';
-
-            // Get only Approved cases
             const approvedCases = database.cases.filter(c => c.status === 'approved');
 
-            approvedCases.forEach(caseItem => {
-                const hasReceived = caseItem.receivedHistory &&
-                    caseItem.receivedHistory.some(h => h.type === selectedType);
+            let masterNotReceivedList = [];
+            let masterReceivedList = [];
 
-                if (hasReceived) {
-                    // Render in Received Table
-                    const record = caseItem.receivedHistory.find(h => h.type === selectedType);
-                    const tr = document.createElement('tr');
+            if (targetType === 'case') {
+                approvedCases.forEach(caseItem => {
+                    const matchesSearch = caseItem.husbandName.toLowerCase().includes(searchTerm) ||
+                        caseItem.husbandID.includes(searchTerm);
+                    if (!matchesSearch) return;
+
+                    const hasReceived = caseItem.receivedHistory &&
+                        caseItem.receivedHistory.some(h => h.type === selectedType);
+
+                    if (hasReceived) {
+                        const record = caseItem.receivedHistory.find(h => h.type === selectedType);
+                        masterReceivedList.push({ case: caseItem, record });
+                    } else {
+                        masterNotReceivedList.push({ case: caseItem });
+                    }
+                });
+            } else {
+                approvedCases.forEach(caseItem => {
+                    if (caseItem.children && caseItem.children.length > 0) {
+                        caseItem.children.forEach(child => {
+                            // ONLY SHOW APPROVED CHILDREN
+                            if (child.status !== 'approved') return;
+
+                            const matchesSearch = child.name.toLowerCase().includes(searchTerm) ||
+                                caseItem.husbandID.includes(searchTerm) ||
+                                caseItem.husbandName.toLowerCase().includes(searchTerm);
+                            if (!matchesSearch) return;
+
+                            const hasReceived = child.receivedHistory &&
+                                child.receivedHistory.some(h => h.type === selectedType);
+
+                            if (hasReceived) {
+                                const record = child.receivedHistory.find(h => h.type === selectedType);
+                                masterReceivedList.push({ case: caseItem, child, record });
+                            } else {
+                                masterNotReceivedList.push({ case: caseItem, child });
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Paginate and Render Not Received
+            const pagNotReceived = paginateResults(masterNotReceivedList, currentPageNotReceived);
+            notReceivedBody.innerHTML = '';
+            pagNotReceived.items.forEach(item => {
+                const tr = document.createElement('tr');
+                if (targetType === 'case') {
                     tr.innerHTML = `
-                        <td>${caseItem.husbandName}</td>
-                        <td>${caseItem.phone}</td>
-                        <td>${caseItem.husbandID}</td>
-                        <td>${new Date(record.date).toLocaleDateString('ar-EG')}</td>
+                        <td>${item.case.husbandName}</td>
+                        <td>${item.case.phone}</td>
+                        <td>${item.case.husbandID}</td>
                         <td>
-                            <button class="btn btn-danger btn-sm" title="إلغاء الاستلام" onclick="cancelAidDelivery(${caseItem.id}, '${selectedType}')">
-                                ✕ إلغاء
-                            </button>
-                        </td>
-                    `;
-                    receivedBody.appendChild(tr);
-                } else {
-                    // Render in Not Received Table
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${caseItem.husbandName}</td>
-                        <td>${caseItem.phone}</td>
-                        <td>${caseItem.husbandID}</td>
-                        <td>
-                            <button class="btn btn-primary btn-sm" onclick="deliverAid(${caseItem.id}, '${selectedType}')">
+                            <button class="btn btn-primary btn-sm" onclick="deliverAid(${item.case.id}, '${selectedType}', null)">
                                 📦 تسليم
                             </button>
                         </td>
                     `;
-                    notReceivedBody.appendChild(tr);
+                } else {
+                    tr.innerHTML = `
+                        <td>
+                            <div style="font-weight:600; color:var(--primary);">👶 ${item.child.name}</div>
+                            <div style="font-size:0.8rem; color:var(--text-secondary);">ولي الأمر: ${item.case.husbandName}</div>
+                        </td>
+                        <td>${item.case.phone}</td>
+                        <td>${item.case.husbandID} (ولي الأمر)</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="deliverAid(${item.case.id}, '${selectedType}', '${item.child.name}')">
+                                📦 تسليم للطفل
+                            </button>
+                        </td>
+                    `;
                 }
+                notReceivedBody.appendChild(tr);
+            });
+            renderPaginationControls('notReceivedPagination', pagNotReceived.totalPages, currentPageNotReceived, (newPage) => {
+                currentPageNotReceived = newPage;
+                renderDistributionLists();
+            });
+
+            // Paginate and Render Received
+            const pagReceived = paginateResults(masterReceivedList, currentPageReceived);
+            receivedBody.innerHTML = '';
+            pagReceived.items.forEach(item => {
+                const tr = document.createElement('tr');
+                if (targetType === 'case') {
+                    tr.innerHTML = `
+                        <td>${item.case.husbandName}</td>
+                        <td>${item.case.phone}</td>
+                        <td>${item.case.husbandID}</td>
+                        <td>${new Date(item.record.date).toLocaleDateString('ar-EG')}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" title="إلغاء الاستلام" onclick="cancelAidDelivery(${item.case.id}, '${selectedType}', null)">
+                                ✕ إلغاء
+                            </button>
+                        </td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td>
+                            <div style="font-weight:600; color:var(--primary);">👶 ${item.child.name}</div>
+                            <div style="font-size:0.8rem; color:var(--text-secondary);">ولي الأمر: ${item.case.husbandName}</div>
+                        </td>
+                        <td>${item.case.phone}</td>
+                        <td>${item.case.husbandID} (ولي الأمر)</td>
+                        <td>${new Date(item.record.date).toLocaleDateString('ar-EG')}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" title="إلغاء الاستلام" onclick="cancelAidDelivery(${item.case.id}, '${selectedType}', '${item.child.name}')">
+                                ✕ إلغاء
+                            </button>
+                        </td>
+                    `;
+                }
+                receivedBody.appendChild(tr);
+            });
+            renderPaginationControls('receivedPagination', pagReceived.totalPages, currentPageReceived, (newPage) => {
+                currentPageReceived = newPage;
+                renderDistributionLists();
             });
         }
 
-        function deliverAid(caseId, aidType) {
+        function deliverAid(caseId, aidType, childName) {
             const caseItem = database.cases.find(c => c.id === caseId);
             if (!caseItem) return;
 
-            if (!caseItem.receivedHistory) {
-                caseItem.receivedHistory = [];
+            if (childName) {
+                // Deliver to specific child
+                const child = caseItem.children.find(c => c.name === childName);
+                if (!child) return;
+                if (!child.receivedHistory) child.receivedHistory = [];
+                child.receivedHistory.push({
+                    type: aidType,
+                    date: new Date().toISOString()
+                });
+            } else {
+                // Deliver to the case primary
+                if (!caseItem.receivedHistory) {
+                    caseItem.receivedHistory = [];
+                }
+                caseItem.receivedHistory.push({
+                    type: aidType,
+                    date: new Date().toISOString()
+                });
             }
-
-            caseItem.receivedHistory.push({
-                type: aidType,
-                date: new Date().toISOString()
-            });
 
             saveData();
             renderDistributionLists();
-            showAlert('success', `✅ تم تسليم ${aidType} بنجاح للحالة: ${caseItem.husbandName}`);
+            showAlert('success', `✅ تم تسليم ${aidType} بنجاح لـ: ${childName ? childName : caseItem.husbandName}`);
         }
 
-        function cancelAidDelivery(caseId, aidType) {
+        function cancelAidDelivery(caseId, aidType, childName) {
             const caseItem = database.cases.find(c => c.id === caseId);
-            if (!caseItem || !caseItem.receivedHistory) return;
+            if (!caseItem) return;
 
-            if (confirm(`هل أنت متأكد من إلغاء استلام "${aidType}" لهذه الحالة؟`)) {
-                caseItem.receivedHistory = caseItem.receivedHistory.filter(h => h.type !== aidType);
+            if (confirm(`هل أنت متأكد من إلغاء استلام "${aidType}" لـ ${childName ? childName : 'هذه الحالة'}؟`)) {
+                if (childName) {
+                    const child = caseItem.children.find(c => c.name === childName);
+                    if (child && child.receivedHistory) {
+                        child.receivedHistory = child.receivedHistory.filter(h => h.type !== aidType);
+                    }
+                } else {
+                    if (caseItem.receivedHistory) {
+                        caseItem.receivedHistory = caseItem.receivedHistory.filter(h => h.type !== aidType);
+                    }
+                }
                 saveData();
                 renderDistributionLists();
                 showAlert('warning', `⚠️ تم إلغاء استلام ${aidType}`);
@@ -2853,17 +3350,10 @@
         // Initialize
         window.addEventListener('load', function () {
             loadData();
-        });
-
-        // Search Distribution
-        document.getElementById('searchDistribution').addEventListener('input', function (e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('#distributionTableBody tr');
-
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
-            });
+            // Auto-fetch from cloud on startup to sync multiple devices
+            setTimeout(() => {
+                fetchFromCloud();
+            }, 1000);
         });
     </script>
 
@@ -3177,7 +3667,7 @@
             const file = input.files[0];
             if (!file) return;
 
-            if (!confirm('⚠️ تحذير: استعادة نسخة احتياطية سيؤدي إلى مسح كافة البيانات الحالية واستبدالها بالبيانات الموجودة في الملف. هل تريد الاستمرار؟')) {
+            if (!confirm('⚠️ هل تريد دمج البيانات من هذا الملف مع البيانات الحالية؟\nسيتم إضافة الحالات الجديدة فقط، ولن يتم تكرار الحالات الموجودة بالفعل (بناءً على الاسم والرقم القومي).')) {
                 input.value = '';
                 return;
             }
@@ -3187,22 +3677,72 @@
                 try {
                     const importedData = JSON.parse(e.target.result);
 
-                    // Validation: must have cases array
                     if (!importedData || !importedData.cases || !Array.isArray(importedData.cases)) {
                         throw new Error('الملف المختار ليس نسخة احتياطية صالحة لهذا النظام.');
                     }
 
-                    database = importedData;
+                    let newCasesCount = 0;
+                    let duplicateCount = 0;
+                    let duplicateNames = [];
+
+                    // Merge Cases
+                    importedData.cases.forEach(impCase => {
+                        const isDuplicate = database.cases.some(existingCase =>
+                            existingCase.husbandID === impCase.husbandID &&
+                            existingCase.husbandName === impCase.husbandName
+                        );
+
+                        if (!isDuplicate) {
+                            // Ensure ID uniqueness for the local session if needed
+                            if (database.cases.some(c => c.id === impCase.id)) {
+                                impCase.id = Date.now() + Math.floor(Math.random() * 1000);
+                            }
+                            database.cases.push(impCase);
+                            newCasesCount++;
+                        } else {
+                            duplicateCount++;
+                            if (duplicateNames.length < 5) duplicateNames.push(impCase.husbandName);
+                        }
+                    });
+
+                    // Merge Categories
+                    if (importedData.categories) {
+                        importedData.categories.forEach(impCat => {
+                            if (!database.categories.some(cat => cat.id === impCat.id || cat.name === impCat.name)) {
+                                database.categories.push(impCat);
+                            }
+                        });
+                    }
+
+                    // Merge Aid Types
+                    if (importedData.aidTypes) {
+                        importedData.aidTypes.forEach(impType => {
+                            const typeName = typeof impType === 'string' ? impType : impType.name;
+                            if (!database.aidTypes.some(t => (typeof t === 'string' ? t : t.name) === typeName)) {
+                                database.aidTypes.push(impType);
+                            }
+                        });
+                    }
+
                     saveData();
 
-                    showAlert('success', '✅ تم استعادة كافة البيانات بنجاح! سيتم تحديث النظام الآن...');
+                    let msg = `✅ تمت العملية بنجاح!\n- تم إضافة ${newCasesCount} حالة جديدة.`;
+                    if (duplicateCount > 0) {
+                        msg += `\n- تم العثور على ${duplicateCount} حالة مكررة وتجاهلها لعدم التكرار.`;
+                        if (duplicateNames.length > 0) {
+                            msg += `\n(مثل: ${duplicateNames.join('، ')}${duplicateCount > 5 ? '...' : ''})`;
+                        }
+                    }
+
+                    showAlert('success', msg);
+
                     setTimeout(() => {
                         window.location.reload();
-                    }, 1500);
+                    }, 3000);
 
                 } catch (err) {
                     console.error(err);
-                    showAlert('error', '❌ فشل استعادة البيانات: ' + err.message);
+                    showAlert('error', '❌ فشل دمج البيانات: ' + err.message);
                 }
             };
             reader.readAsText(file);
@@ -3223,10 +3763,12 @@
         window.resetForm = resetForm;
         window.deliverAid = deliverAid;
         window.approveCase = approveCase;
+        window.approveChild = approveChild;
         window.editAidType = editAidType;
         window.deleteAidType = deleteAidType;
         window.renderAidManagementList = renderAidManagementList;
         window.cancelAidDelivery = cancelAidDelivery;
+        window.renderMonthlySummary = renderMonthlySummary;
 
     </script>
 
@@ -3235,21 +3777,9 @@
         const searchDistInput = document.getElementById('searchDistribution');
         if (searchDistInput) {
             searchDistInput.addEventListener('input', function (e) {
-                const searchTerm = e.target.value.toLowerCase();
-
-                // Filter Not Received Table
-                const rows1 = document.querySelectorAll('#notReceivedTableBody tr');
-                rows1.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchTerm) ? '' : 'none';
-                });
-
-                // Filter Received Table
-                const rows2 = document.querySelectorAll('#receivedTableBody tr');
-                rows2.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchTerm) ? '' : 'none';
-                });
+                currentPageNotReceived = 1;
+                currentPageReceived = 1;
+                renderDistributionLists();
             });
         }
     </script>

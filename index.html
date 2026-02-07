@@ -1,0 +1,3146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جمعية تنمية المجتمع بالرحمانية</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Tajawal:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1976D2;
+            /* Blue */
+            --primary-dark: #1565C0;
+            /* Darker Blue */
+            --primary-light: #e3f2fd;
+            /* Very Light Blue */
+            --secondary: #FB8C00;
+            /* Orange */
+            --accent: #d32f2f;
+            /* Red */
+            --success: #2e7d32;
+            /* Green */
+            --warning: #f57c00;
+            /* Orange-Yellow */
+            --bg-main: #f5f7fa;
+            /* Light Gray BG */
+            --bg-card: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border: #e0e0e0;
+            --shadow: rgba(0, 0, 0, 0.08);
+            /* Neutral shadow */
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--primary);
+            /* Reverted to Blue background */
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 12px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            animation: slideDown 0.5s ease-out;
+            color: white;
+            /* White text */
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .app-title {
+            color: white;
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            max-width: 1400px;
+            margin: 2rem auto;
+            gap: 2rem;
+            padding: 0 2rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+            animation: slideInRight 0.6s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .nav-item {
+            padding: 1rem 1.2rem;
+            margin-bottom: 0.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .nav-item:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            transform: translateX(-5px);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .nav-icon {
+            font-size: 1.3rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Dashboard Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 1.8rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: scaleIn 0.5s ease-out backwards;
+        }
+
+        .stat-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stat-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .stat-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .stat-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px var(--shadow);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Forms */
+        .form-section {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-label.required::after {
+            content: ' *';
+            color: var(--accent);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 0.9rem 1.2rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.9rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--shadow);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #c4956a;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #40c057;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Edit Button Specific Style */
+        .btn-edit {
+            background: #cdcdcd;
+            /* Orange base */
+            color: white;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn-edit::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: #ff0000;
+            /* Darker orange for hover fill */
+            z-index: -1;
+            transition: width 0.3s ease;
+        }
+
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .btn-edit:hover::before {
+            width: 100%;
+        }
+
+        /* Children List */
+        .children-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .child-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--primary-light);
+            border-radius: 10px;
+            align-items: center;
+        }
+
+        .remove-child-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .remove-child-btn:hover {
+            background: #ff5252;
+            transform: scale(1.1);
+        }
+
+        /* Tables */
+        .table-container {
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px var(--shadow);
+            overflow: hidden;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table thead {
+            background: var(--primary);
+            color: white;
+        }
+
+        .table th,
+        .table td {
+            padding: 1.2rem;
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table th {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background: var(--primary-light);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: #fff3bf;
+            color: #996600;
+        }
+
+        .status-approved {
+            background: #d3f9d8;
+            color: #2f9e44;
+        }
+
+        .status-rejected {
+            background: #ffe3e3;
+            color: #c92a2a;
+        }
+
+        .status-received {
+            background: #d3f9d8;
+            color: #2f9e44;
+        }
+
+        .status-not-received {
+            background: #f1f3f5;
+            color: #495057;
+        }
+
+        /* Action Buttons in Table */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--accent);
+            transform: rotate(90deg);
+        }
+
+        /* Search Bar */
+        .search-bar {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        /* Voting Section */
+        .vote-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .vote-count {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .vote-approve {
+            background: #d3f9d8;
+            color: #2f9e44;
+        }
+
+        .vote-reject {
+            background: #ffe3e3;
+            color: #c92a2a;
+        }
+
+        .vote-abstain {
+            background: #f1f3f5;
+            color: #495057;
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .alert-success {
+            background: #d3f9d8;
+            color: #2f9e44;
+            border-right: 4px solid #51cf66;
+        }
+
+        .alert-error {
+            background: #ffe3e3;
+            color: #c92a2a;
+            border-right: 4px solid #ff6b6b;
+        }
+
+        .alert-info {
+            background: #d0ebff;
+            color: #1971c2;
+            border-right: 4px solid #339af0;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+            }
+
+            .nav-item {
+                display: inline-flex;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+
+        /* Utility Classes */
+        .mt-1 {
+            margin-top: 0.5rem;
+        }
+
+        .mt-2 {
+            margin-top: 1rem;
+        }
+
+        .mt-3 {
+            margin-top: 1.5rem;
+        }
+
+        .mb-1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 1.5rem;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .flex-end {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .custom-fields-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .custom-field-item {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.8rem;
+            background: var(--primary-light);
+            border-radius: 8px;
+        }
+
+        /* Responsive Design Media Queries */
+        @media (max-width: 1024px) {
+            .main-layout {
+                flex-direction: column;
+                margin: 1rem auto;
+                padding: 0 1rem;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                margin-bottom: 1.5rem;
+            }
+
+            .sidebar nav {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 0.5rem;
+            }
+
+            .nav-item {
+                margin-bottom: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .logo-section {
+                gap: 0.5rem;
+            }
+
+            .app-title {
+                font-size: 1.1rem;
+            }
+
+            .logo {
+                width: 40px;
+                height: 40px;
+            }
+
+            .form-section {
+                padding: 1.5rem;
+            }
+
+            .section-title {
+                font-size: 1.2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 1.8rem;
+                -webkit-overflow-scrolling: touch;
+                border-radius: 8px;
+            }
+
+            .table th,
+            .table td {
+                padding: 0.8rem;
+                font-size: 0.85rem;
+                min-width: 120px;
+                /* Ensures columns don't squish too much */
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 2% auto;
+                padding: 1.5rem;
+                max-height: 90vh;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flex-end {
+                flex-direction: column;
+                width: 100%;
+                gap: 0.8rem;
+            }
+
+            .flex-end .btn {
+                width: 100%;
+            }
+
+            .custom-field-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-title {
+                font-size: 0.9rem;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+                /* Standard property */
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            .sidebar nav {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-item {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo"><img class="logo" src="logo association.jpeg" alt="logo"></div>
+                <h1 class="app-title">نظام إدارة جمعية تنمية المجتمع بالرحمانية</h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <nav>
+                <div class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span>لوحة التحكم</span>
+                </div>
+                <div class="nav-item" data-page="cases">
+                    <span class="nav-icon">📝</span>
+                    <span>تسجيل الحالات</span>
+                </div>
+                <div class="nav-item" data-page="voting">
+                    <span class="nav-icon">🗳️</span>
+                    <span>الاختيار الذكي والاعتماد</span>
+                </div>
+                <div class="nav-item" data-page="distribution">
+                    <span class="nav-icon">📦</span>
+                    <span>توزيع المساعدات</span>
+                </div>
+                <div class="nav-item" data-page="reports">
+                    <span class="nav-icon">📈</span>
+                    <span>التقارير والإحصائيات</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-icon">👥</span>
+                        </div>
+                        <div class="stat-value" id="totalCases">0</div>
+                        <div class="stat-label">إجمالي الحالات المسجلة</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-icon">⏳</span>
+                        </div>
+                        <div class="stat-value" id="pendingCases">0</div>
+                        <div class="stat-label">حالات قيد الانتظار</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-icon">✅</span>
+                        </div>
+                        <div class="stat-value" id="approvedCases">0</div>
+                        <div class="stat-label">حالات معتمدة</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-icon">📦</span>
+                        </div>
+                        <div class="stat-value" id="totalDistributions">0</div>
+                        <div class="stat-label">المساعدات الموزعة</div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title">آخر الأنشطة</h2>
+                    <div id="recentActivities"></div>
+                </div>
+            </div>
+
+            <!-- Cases Registration Page -->
+            <div id="cases" class="page">
+                <div class="form-section">
+                    <h2 class="section-title">تسجيل حالة جديدة</h2>
+                    <form id="caseForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label required">اسم المستفيد</label>
+                                <input type="text" class="form-input" id="husbandName" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">الرقم القومي للزوجه / للزوج</label>
+                                <input type="text" class="form-input" id="husbandID" maxlength="14"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 14)" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">اسم الزوج / الزوجة</label>
+                                <input type="text" class="form-input" id="wifeName">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"> الرقم القومي للزوجة او الزوج</label>
+                                <input type="text" class="form-input" id="wifeID" maxlength="14"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 14)">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">رقم الهاتف</label>
+                                <input type="tel" class="form-input" id="phone" maxlength="11"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11)" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">رقم هاتف إضافي</label>
+                                <input type="tel" class="form-input" id="phone2">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">نوع السكن</label>
+                                <select class="form-select" id="housingType" required>
+                                    <option value="">-- اختر نوع السكن --</option>
+                                    <option value="apartment">شقة</option>
+                                    <option value="house">منزل مستقل</option>
+                                    <option value="room">غرفة</option>
+                                    <option value="other">أخرى</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">حالة الأب</label>
+                                <select class="form-select" id="fatherStatus" required>
+                                    <option value="">-- اختر الحالة --</option>
+                                    <option value="present">موجود</option>
+                                    <option value="absent">غائب</option>
+                                    <option value="deceased">متوفى</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">إجمالي الدخل الشهري</label>
+                                <input type="number" class="form-input" id="totalIncome" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">مصادر الدخل</label>
+                                <input type="text" class="form-input" id="incomeSource"
+                                    placeholder="مثال: عمل حر، راتب، معاش">
+                            </div>
+                        </div>
+
+                        <div class="form-grid mt-3">
+                            <div class="form-group">
+                                <label class="form-label required">سنة الميلاد (4 أرقام)</label>
+                                <input type="number" class="form-input" id="birthYear" placeholder="مثال: 1990"
+                                    min="1900" max="2026" required oninput="calculateAgeFromYear()">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">العمر (سنة)</label>
+                                <input type="number" class="form-input" id="age" readonly
+                                    style="background:#f8f9fa; cursor: not-allowed;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">عدد الأصوات المبدئي</label>
+                                <input type="number" class="form-input" id="initialVotes" placeholder="0" min="0"
+                                    value="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">القسم</label>
+                                <select class="form-select" id="caseCategory" required>
+                                    <option value="">-- اختر القسم --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label class="form-label">ملاحظات عامة</label>
+                            <textarea class="form-textarea" id="generalNotes"></textarea>
+                        </div>
+
+                        <h3 class="section-title mt-3">بيانات الأطفال</h3>
+                        <div class="children-list" id="childrenList"></div>
+                        <button type="button" class="btn btn-secondary mt-2" onclick="addChild()">
+                            ➕ إضافة طفل
+                        </button>
+
+                        <h3 class="section-title mt-3">حقول مخصصة</h3>
+                        <div class="custom-fields-list" id="customFieldsList"></div>
+                        <button type="button" class="btn btn-outline mt-2" onclick="addCustomField()">
+                            ➕ إضافة حقل مخصص
+                        </button>
+
+                        <h3 class="section-title mt-3">إدارة الأقسام</h3>
+                        <button type="button" class="btn btn-secondary" onclick="openCategoryManager()">
+                            🏷️ إدارة الأقسام
+                        </button>
+
+                        <div class="flex-end mt-3">
+                            <button type="button" class="btn btn-outline" onclick="resetForm()">إلغاء</button>
+                            <button type="submit" class="btn btn-primary">💾 حفظ الحالة</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="form-section mt-3">
+                    <h2 class="section-title">الحالات المسجلة</h2>
+                    <div class="search-bar">
+                        <input type="text" class="search-input" id="searchCases"
+                            placeholder="بحث بالاسم أو الرقم القومي...">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>اسم الزوج</th>
+                                    <th>الرقم القومي</th>
+                                    <th>عدد الأطفال</th>
+                                    <th>الدخل</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="casesTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voting/Approval Page -->
+            <div id="voting" class="page">
+                <div class="form-section">
+                    <h2 class="section-title">اعتماد الحالات المعلقة</h2>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>اسم الحالة</th>
+                                    <th>الرقم القومي</th>
+                                    <th>عدد الأطفال</th>
+                                    <th>الدخل</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="votingTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Restore Smart Selection Section -->
+                <div class="form-section mt-3">
+                    <h2 class="section-title">🎯 الاختيار الذكي للحالات</h2> <!-- Restored Title -->
+
+                    <div class="alert alert-info">
+                        <span>💡</span>
+                        <div>
+                            <strong>الاختيار الذكي</strong> يساعدك في اعتماد مجموعة من الحالات دفعة واحدة بناءً على
+                            معايير الاستحقاق.
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label required">عدد الحالات المطلوب اعتمادها</label>
+                            <input type="number" class="form-input" id="smartSelectionCount" placeholder="مثال: 50"
+                                min="1">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label required">معيار الأولوية</label>
+                            <select class="form-select" id="smartSelectionMethod">
+                                <option value="">-- اختر المعيار --</option>
+                                <option value="income">الأقل دخلاً (الأكثر فقراً)</option>
+                                <option value="children">الأكثر عدد أطفال</option>
+                                <option value="orphans">الأيتام أولاً</option>
+                                <option value="youngest">الأصغر سناً (أصغر طفل)</option>
+                                <option value="combined">معيار مُركّب (متعدد الأولويات)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="combinedCriteriaSection" style="display: none;" class="mt-3">
+                        <h4 style="margin-bottom: 1rem; color: var(--primary);">ترتيب الأولويات</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">الأولوية 1</label>
+                                <select class="form-select" id="priority1">
+                                    <option value="">-- اختر --</option>
+                                    <option value="income">الدخل</option>
+                                    <option value="children">عدد الأطفال</option>
+                                    <option value="orphans">الأيتام</option>
+                                    <option value="youngest">السن</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">الأولوية 2</label>
+                                <select class="form-select" id="priority2">
+                                    <option value="">-- اختر --</option>
+                                    <option value="income">الدخل</option>
+                                    <option value="children">عدد الأطفال</option>
+                                    <option value="orphans">الأيتام</option>
+                                    <option value="youngest">السن</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">الأولوية 3</label>
+                                <select class="form-select" id="priority3">
+                                    <option value="">-- اختر --</option>
+                                    <option value="income">الدخل</option>
+                                    <option value="children">عدد الأطفال</option>
+                                    <option value="orphans">الأيتام</option>
+                                    <option value="youngest">السن</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex-end mt-3">
+                        <button class="btn btn-outline" onclick="previewSmartSelection()">
+                            👁️ معاينة الاختيار
+                        </button>
+                        <button class="btn btn-primary" onclick="executeSmartSelection()">
+                            ✅ اعتماد الحالات المختارة
+                        </button>
+                    </div>
+                </div>
+
+                <div id="smartSelectionPreview" class="form-section mt-3" style="display: none;">
+                    <h2 class="section-title">نتائج المعاينة</h2>
+                    <div id="selectionSummary" class="import-summary"></div>
+                    <div class="table-container mt-2">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>اسم الحالة</th>
+                                    <th>الرقم القومي</th>
+                                    <th>عدد الأطفال</th>
+                                    <th>رقم الهاتف</th>
+                                    <th>الأيتام</th>
+                                    <th>معيار الاختيار</th>
+                                </tr>
+                            </thead>
+                            <tbody id="smartSelectionPreviewBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <!-- Distribution Page -->
+            <div id="distribution" class="page">
+                <!-- Add New Aid Type Section -->
+                <div class="form-section">
+                    <h2 class="section-title">إدارة أنواع المساعدات</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label required">إضافة نوع مساعدة جديد</label>
+                            <div style="display: flex; gap: 1rem;">
+                                <input type="text" class="form-input" id="newAidTypeInput"
+                                    placeholder="مثال: شنطة رمضان، كفالة شهرية..." style="flex: 1;">
+                                <button class="btn btn-primary" onclick="addNewAidType()">
+                                    ➕ إضافة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aid Types Management Table -->
+                    <div class="table-container mt-3">
+                        <table class="table" style="font-size: 0.95rem;">
+                            <thead>
+                                <tr>
+                                    <th>اسم المساعدة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="aidTypesManagementBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Delivery Management Section -->
+                <div class="form-section mt-3">
+                    <h2 class="section-title">تسليم المساعدات</h2>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label required">اختر المساعدة لتوزيعها</label>
+                        <select class="form-select" id="aidTypeSelect" onchange="renderDistributionLists()">
+                            <option value="">-- اختر نوع المساعدة --</option>
+                        </select>
+                    </div>
+
+                    <!-- Not Received List -->
+                    <div id="deliveryLists" style="display: none;">
+
+                        <div class="form-group mb-3">
+                            <input type="text" class="form-input" id="searchDistribution"
+                                placeholder="🔍 بحث عن حالة (الاسم أو الرقم القومي)...">
+                        </div>
+
+                        <h3 class="section-title" style="font-size: 1.2rem; color: var(--secondary);">⬇️ قيد التسليم (لم
+                            يستلم بعد)</h3>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>اسم الحالة</th>
+                                        <th>رقم الهاتف</th>
+                                        <th>الرقم القومي</th>
+                                        <th>الإجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="notReceivedTableBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Received List -->
+                        <h3 class="section-title mt-3" style="font-size: 1.2rem; color: var(--success);">✅ تم التسليم
+                        </h3>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>اسم الحالة</th>
+                                        <th>رقم الهاتف</th>
+                                        <th>الرقم القومي</th>
+                                        <th>تاريخ التسليم</th>
+                                        <th>الإجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="receivedTableBody">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div id="reports" class="page">
+                <div class="form-section">
+                    <h2 class="section-title">بحث عن حالة معينة</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">الرقم القومي</label>
+                            <input type="text" class="form-input" id="reportNationalID" maxlength="14"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 14)">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end;">
+                            <button class="btn btn-primary" style="width: 100%;" onclick="generateCaseReport()">
+                                🔍 بحث
+                            </button>
+                        </div>
+                    </div>
+                    <div id="caseReportResult" class="mt-3"></div>
+                </div>
+
+                <div class="form-section mt-3">
+                    <h2 class="section-title">إحصائيات التوزيع</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">من تاريخ</label>
+                            <input type="date" class="form-input" id="reportFromDate">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">إلى تاريخ</label>
+                            <input type="date" class="form-input" id="reportToDate">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">نوع المساعدة</label>
+                            <select class="form-select" id="reportAidType">
+                                <option value="">الكل</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="display: flex; align-items: flex-end;">
+                            <button class="btn btn-primary" style="width: 100%;" onclick="generateStatsReport()">
+                                📊 إنشاء التقرير
+                            </button>
+                        </div>
+                    </div>
+                    <div id="statsReportResult" class="mt-3"></div>
+                </div>
+
+                <div class="form-section mt-3">
+                    <h2 class="section-title">تصدير البيانات</h2>
+                    <div class="flex-end">
+                        <button class="btn btn-secondary" onclick="exportToExcel()">
+                            📊 تصدير إلى Excel
+                        </button>
+                        <button class="btn btn-success" onclick="exportToPDF()">
+                            📄 تصدير إلى PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Backup & Restore Management -->
+                <div class="form-section mt-3" style="border: 2px dashed var(--primary-light);">
+                    <h2 class="section-title">📦 إدارة البيانات والنسخ الاحتياطي السحابي</h2>
+                    <p class="mb-2" style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
+                        لتخزين بياناتك سحابياً (مثل <strong>Google Drive</strong>)، قم بتحميل النسخة الاحتياطية وحفظها
+                        في درايف.
+                        يمكنك استعادة البيانات في أي وقت على أي جهاز آخر باستخدام نفس الملف.
+                    </p>
+                    <div class="flex-end" style="gap: 1rem; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="exportFullBackup()"
+                            title="حفظ كل الحالات والإعدادات في ملف واحد">
+                            📥 تحميل نسخة احتياطية شاملة (JSON)
+                        </button>
+                        <div style="position: relative;">
+                            <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">
+                                📤 استعادة من نسخة احتياطية
+                            </button>
+                            <input type="file" id="importFile" style="display: none;" accept=".json"
+                                onchange="importFullBackup(this)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Case Details Modal -->
+    <div id="caseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">تفاصيل الحالة</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // Database Simulation
+        let database = {
+            cases: [],
+            distributions: [],
+            customFields: [],
+            categories: [
+                { id: 'general', name: 'عام' },
+                { id: 'widows', name: 'أرامل' },
+                { id: 'orphans', name: 'أيتام' }
+            ],
+            aidTypes: []
+        };
+
+        let childrenCount = 0;
+        let customFieldsCount = 0;
+        let currentDistribution = null;
+        let editingCaseId = null;
+
+        // Load data from localStorage
+        function loadData() {
+            const savedData = localStorage.getItem('charityDB');
+            if (savedData) {
+                database = JSON.parse(savedData);
+                // Initialize categories if not present
+                if (!database.categories) {
+                    database.categories = [
+                        { id: 'general', name: 'عام' },
+                        { id: 'widows', name: 'أرامل' },
+                        { id: 'orphans', name: 'أيتام' }
+                    ];
+                }
+                // Initialize aidTypes if not present
+                if (!database.aidTypes) {
+                    database.aidTypes = [];
+                }
+                updateDashboard();
+                renderCasesTable();
+                renderVotingTable();
+                renderCategoriesSelect();
+                renderAidTypeSelect();
+            } else {
+                renderCategoriesSelect();
+                renderAidTypeSelect();
+            }
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('charityDB', JSON.stringify(database));
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function () {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+
+                this.classList.add('active');
+                const pageId = this.getAttribute('data-page');
+                document.getElementById(pageId).classList.add('active');
+            });
+        });
+
+        // Add Child
+        function addChild() {
+            childrenCount++;
+            const childrenList = document.getElementById('childrenList');
+            const childItem = document.createElement('div');
+            childItem.className = 'child-item';
+            childItem.innerHTML = `
+                <div class="form-group">
+                    <input type="text" class="form-input" placeholder="اسم الطفل" name="childName${childrenCount}">
+                </div>
+                <div class="form-group">
+                    <input type="date" class="form-input" placeholder="تاريخ الميلاد" name="childBirth${childrenCount}">
+                </div>
+                <button type="button" class="remove-child-btn" onclick="this.parentElement.remove()">✕</button>
+            `;
+            childrenList.appendChild(childItem);
+        }
+
+        // Add Custom Field
+        function addCustomField() {
+            customFieldsCount++;
+            const fieldsList = document.getElementById('customFieldsList');
+            const fieldItem = document.createElement('div');
+            fieldItem.className = 'custom-field-item';
+            fieldItem.innerHTML = `
+                <div class="form-group" style="flex: 1;">
+                    <input type="text" class="form-input" placeholder="اسم الحقل" name="customFieldName${customFieldsCount}">
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <input type="text" class="form-input" placeholder="القيمة" name="customFieldValue${customFieldsCount}">
+                </div>
+                <button type="button" class="remove-child-btn" onclick="this.parentElement.remove()">✕</button>
+            `;
+            fieldsList.appendChild(fieldItem);
+        }
+
+        // Calculate Age (Fixed relative to 2026)
+        function calculateAge(birthDate) {
+            if (!birthDate) return '';
+            const birthBy = new Date(birthDate);
+            const targetYear = 2026;
+            const birthYear = birthBy.getFullYear();
+            let age = targetYear - birthYear;
+            return age >= 0 ? age : 0;
+        }
+
+        // Calculate Age from Birth Year
+        function calculateAgeFromYear() {
+            const birthYear = document.getElementById('birthYear').value;
+            if (birthYear && birthYear.toString().length === 4) {
+                const currentYear = 2026;
+                const age = currentYear - parseInt(birthYear);
+                if (age >= 0 && age < 150) {
+                    document.getElementById('age').value = age;
+                } else {
+                    document.getElementById('age').value = '';
+                }
+            } else {
+                document.getElementById('age').value = '';
+            }
+        }
+
+        // Render Categories in Select Dropdown
+        function renderCategoriesSelect() {
+            const categorySelect = document.getElementById('caseCategory');
+            if (!categorySelect) return;
+
+            categorySelect.innerHTML = '<option value="">-- اختر القسم --</option>';
+            database.categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.id;
+                option.textContent = cat.name;
+                categorySelect.appendChild(option);
+            });
+        }
+
+        // Category Manager Functions
+        function openCategoryManager() {
+            let modal = document.getElementById('categoryManagerModal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'categoryManagerModal';
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="modal-title">🏷️ إدارة الأقسام</h2>
+                            <button class="modal-close" onclick="closeCategoryManager()">&times;</button>
+                        </div>
+                        <div style="padding: 1rem 0;">
+                            <div class="form-group">
+                                <label class="form-label">إضافة قسم جديد</label>
+                                <div style="display: flex; gap: 1rem;">
+                                    <input type="text" class="form-input" id="newCategoryName" placeholder="اسم القسم" style="flex: 1;">
+                                    <button class="btn btn-primary" onclick="addNewCategory()">➕ إضافة</button>
+                                </div>
+                            </div>
+                            <h3 style="margin: 1.5rem 0 1rem; color: var(--primary);">الأقسام الحالية</h3>
+                            <div id="categoriesList"></div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            modal.classList.add('active');
+            renderCategoriesList();
+        }
+
+        function renderCategoriesList() {
+            const listContainer = document.getElementById('categoriesList');
+            if (!listContainer) return;
+
+            listContainer.innerHTML = '';
+            database.categories.forEach(cat => {
+                const catItem = document.createElement('div');
+                catItem.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--primary-light); border-radius: 8px; margin-bottom: 0.5rem;';
+                const isDefault = ['general', 'widows', 'orphans'].includes(cat.id);
+                catItem.innerHTML = `
+                    <span style="font-weight: 600;">${cat.name}</span>
+                    <button class="btn btn-danger btn-sm" onclick="deleteCategory('${cat.id}')" ${isDefault ? 'disabled title="لا يمكن حذف الأقسام الافتراضية"' : ''}>✖ حذف</button>
+                `;
+                listContainer.appendChild(catItem);
+            });
+        }
+
+        function addNewCategory() {
+            const nameInput = document.getElementById('newCategoryName');
+            const name = nameInput.value.trim();
+            if (!name) {
+                alert('الرجاء إدخال اسم القسم');
+                return;
+            }
+            const id = 'cat_' + Date.now();
+            database.categories.push({ id, name });
+            saveData();
+            renderCategoriesList();
+            renderCategoriesSelect();
+            nameInput.value = '';
+            showAlert('success', '✅ تم إضافة القسم بنجاح');
+        }
+
+        function deleteCategory(catId) {
+            const casesUsingCategory = database.cases.filter(c => c.category === catId);
+            if (casesUsingCategory.length > 0) {
+                alert(`لا يمكن حذف هذا القسم حيث يوجد ${casesUsingCategory.length} حالة مرتبطة به`);
+                return;
+            }
+            if (confirm('هل أنت متأكد من حذف هذا القسم؟')) {
+                database.categories = database.categories.filter(c => c.id !== catId);
+                saveData();
+                renderCategoriesList();
+                renderCategoriesSelect();
+                showAlert('success', '✅ تم حذف القسم بنجاح');
+            }
+        }
+
+        function closeCategoryManager() {
+            const modal = document.getElementById('categoryManagerModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        // Case Form Submit
+        document.getElementById('caseForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // VALIDATION
+            const valHusbandID = document.getElementById('husbandID').value;
+            const valPhone = document.getElementById('phone').value;
+            const valWifeID = document.getElementById('wifeID').value;
+
+            // Validate National ID (14 digits)
+            if (!/^\d{14}$/.test(valHusbandID)) {
+                showAlert('error', '⚠️ الرقم القومي للزوج يجب أن يكون 14 رقم بالضبط');
+                return;
+            }
+            if (valWifeID && !/^\d{14}$/.test(valWifeID)) {
+                showAlert('error', '⚠️ الرقم القومي للزوجة يجب أن يكون 14 رقم بالضبط');
+                return;
+            }
+
+            // Validate Phone (11 digits)
+            if (!/^\d{11}$/.test(valPhone)) {
+                showAlert('error', '⚠️ رقم الهاتف يجب أن يكون 11 رقم بالضبط');
+                return;
+            }
+
+            const children = [];
+            document.querySelectorAll('.child-item').forEach(item => {
+                const nameSelect = item.querySelector('input[placeholder="اسم الطفل"]');
+                const birthSelect = item.querySelector('input[placeholder="تاريخ الميلاد"]');
+                // Check if element exists before reading value
+                const name = nameSelect ? nameSelect.value : '';
+                const birth = birthSelect ? birthSelect.value : '';
+
+                if (name && birth) {
+                    children.push({ name, birthDate: birth });
+                }
+            });
+
+            const customFields = [];
+            document.querySelectorAll('.custom-field-item').forEach(item => {
+                const nameSelect = item.querySelector('input[placeholder="اسم الحقل"]');
+                const valueSelect = item.querySelector('input[placeholder="القيمة"]');
+                const fieldName = nameSelect ? nameSelect.value : '';
+                const fieldValue = valueSelect ? valueSelect.value : '';
+
+                if (fieldName && fieldValue) {
+                    customFields.push({ name: fieldName, value: fieldValue });
+                }
+            });
+
+            const caseData = {
+                id: editingCaseId ? editingCaseId : Date.now(),
+                husbandName: document.getElementById('husbandName').value,
+                husbandID: document.getElementById('husbandID').value,
+                wifeName: document.getElementById('wifeName').value,
+                wifeID: document.getElementById('wifeID').value,
+                phone: document.getElementById('phone').value,
+                phone2: document.getElementById('phone2').value,
+                housingType: document.getElementById('housingType').value,
+                fatherStatus: document.getElementById('fatherStatus').value,
+                totalIncome: document.getElementById('totalIncome').value,
+                incomeSource: document.getElementById('incomeSource').value,
+                birthYear: document.getElementById('birthYear').value,
+                age: document.getElementById('age').value,
+                category: document.getElementById('caseCategory').value,
+                generalNotes: document.getElementById('generalNotes').value,
+                children: children,
+                customFields: customFields,
+                status: editingCaseId ? database.cases.find(c => c.id === editingCaseId).status : 'pending', // Preserve status on edit
+                votes: editingCaseId ? database.cases.find(c => c.id === editingCaseId).votes : {
+                    approve: parseInt(document.getElementById('initialVotes').value) || 0,
+                    reject: 0,
+                    abstain: 0
+                },
+                createdAt: editingCaseId ? database.cases.find(c => c.id === editingCaseId).createdAt : new Date().toISOString(),
+                receivedHistory: editingCaseId ? database.cases.find(c => c.id === editingCaseId).receivedHistory : []
+            };
+
+            if (editingCaseId) {
+                // Update existing
+                const index = database.cases.findIndex(c => c.id === editingCaseId);
+                if (index !== -1) {
+                    database.cases[index] = caseData;
+                    showAlert('success', '✅ تم تعديل بيانات الحالة بنجاح');
+                }
+            } else {
+                // Create new
+                database.cases.push(caseData);
+                showAlert('success', '✅ تم حفظ الحالة بنجاح');
+            }
+
+            saveData();
+            resetForm();
+            updateDashboard();
+            renderCasesTable();
+            renderVotingTable();
+        });
+
+        // Reset Form
+        // Reset Form
+        // Reset Form
+        function resetForm() {
+            document.getElementById('caseForm').reset();
+            document.getElementById('childrenList').innerHTML = '';
+            document.getElementById('customFieldsList').innerHTML = '';
+            childrenCount = 0;
+            customFieldsCount = 0;
+            editingCaseId = null; // Important: Clear edit mode
+
+            // Restore button text
+            const submitBtn = document.querySelector('#caseForm button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '💾 تسجيل الحالة';
+                submitBtn.classList.remove('btn-warning'); // Remove warning color if applied
+                submitBtn.classList.add('btn-primary');
+            }
+        }
+
+        // Update Dashboard
+        function updateDashboard() {
+            document.getElementById('totalCases').textContent = database.cases.length;
+            document.getElementById('pendingCases').textContent =
+                database.cases.filter(c => c.status === 'pending').length;
+            document.getElementById('approvedCases').textContent =
+                database.cases.filter(c => c.status === 'approved').length;
+            const totalDistributed = database.cases.reduce((sum, c) => sum + (c.receivedHistory ? c.receivedHistory.length : 0), 0);
+            document.getElementById('totalDistributions').textContent = totalDistributed;
+        }
+
+        // Render Cases Table
+        function renderCasesTable() {
+            const tbody = document.getElementById('casesTableBody');
+            tbody.innerHTML = '';
+
+            database.cases.forEach(caseItem => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${caseItem.husbandName}</td>
+                    <td>${caseItem.husbandID}</td>
+                    <td>${caseItem.children.length}</td>
+                    <td>${caseItem.totalIncome} جنيه</td>
+                    <td><span class="status-badge status-${caseItem.status}">${getStatusText(caseItem.status)}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-edit btn-sm" onclick="editCase(${caseItem.id})">✏️</button>
+                            <button class="btn btn-primary btn-sm" onclick="viewCase(${caseItem.id})">👁️ عرض</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteCase(${caseItem.id})">🗑️</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getStatusText(status) {
+            const statuses = {
+                'pending': 'قيد الانتظار',
+                'approved': 'معتمد',
+                'rejected': 'مرفوض'
+            };
+            return statuses[status] || status;
+        }
+
+        // Search Cases
+        document.getElementById('searchCases').addEventListener('input', function (e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#casesTableBody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // View Case Details
+        function viewCase(id) {
+            const caseItem = database.cases.find(c => c.id === id);
+            if (!caseItem) return;
+
+            const modalBody = document.getElementById('modalBody');
+
+            // Format received history
+            let receivedHistoryHtml = '';
+            if (caseItem.receivedHistory && caseItem.receivedHistory.length > 0) {
+                receivedHistoryHtml = `
+                    <div class="mt-3">
+                        <h3 class="section-title" style="font-size: 1.1rem;">سجل المساعدات المستلمة</h3>
+                        <div class="table-container">
+                            <table class="table" style="font-size: 0.9rem;">
+                                <thead>
+                                    <tr>
+                                        <th>نوع المساعدة</th>
+                                        <th>تاريخ الاستلام</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${caseItem.receivedHistory.map(h => `
+                                        <tr>
+                                            <td>${h.type}</td>
+                                            <td>${new Date(h.date).toLocaleDateString('ar-EG')}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            modalBody.innerHTML = `
+                <div class="form-grid">
+                    <div><strong>اسم الزوج:</strong> ${caseItem.husbandName}</div>
+                    <div><strong>الرقم القومي:</strong> ${caseItem.husbandID}</div>
+                    <div><strong>اسم الزوجة:</strong> ${caseItem.wifeName || '-'}</div>
+                    <div><strong>رقم الهاتف:</strong> ${caseItem.phone}</div>
+                    <div><strong>نوع السكن:</strong> ${caseItem.housingType}</div>
+                    <div><strong>حالة الأب:</strong> ${caseItem.fatherStatus}</div>
+                    <div><strong>الدخل الشهري:</strong> ${caseItem.totalIncome} جنيه</div>
+                    <div><strong>مصادر الدخل:</strong> ${caseItem.incomeSource || '-'}</div>
+                    <div><strong>الحالة:</strong> ${getStatusText(caseItem.status)}</div>
+                </div>
+                ${caseItem.generalNotes ? `<div class="mt-2"><strong>ملاحظات:</strong><p>${caseItem.generalNotes}</p></div>` : ''}
+                
+                ${receivedHistoryHtml}
+
+                ${caseItem.children.length > 0 ? `
+                    <div class="mt-3">
+                        <h3>الأطفال (${caseItem.children.length}):</h3>
+                        <ul>
+                            ${caseItem.children.map(child => `
+                                <li>${child.name} - ${calculateAge(child.birthDate)} سنة</li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                ${caseItem.customFields.length > 0 ? `
+                    <div class="mt-3">
+                        <h3>معلومات إضافية:</h3>
+                        ${caseItem.customFields.map(field => `
+                            <div><strong>${field.name}:</strong> ${field.value}</div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('caseModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('caseModal').classList.remove('active');
+        }
+
+        // Delete Case
+        function deleteCase(id) {
+            if (confirm('هل أنت متأكد من حذف هذه الحالة؟')) {
+                database.cases = database.cases.filter(c => c.id !== id);
+                saveData();
+                renderCasesTable();
+                updateDashboard();
+                showAlert('success', '✅ تم حذف الحالة بنجاح');
+            }
+        }
+
+        // Edit Case
+        function editCase(id) {
+            const caseItem = database.cases.find(c => c.id === id);
+            if (!caseItem) return;
+
+            // Switch to Registration Tab
+            const navItem = document.querySelector('[data-page="cases"]');
+            if (navItem) navItem.click();
+
+            // Populate Fields
+            document.getElementById('husbandName').value = caseItem.husbandName;
+            document.getElementById('husbandID').value = caseItem.husbandID;
+            document.getElementById('wifeName').value = caseItem.wifeName || '';
+            document.getElementById('wifeID').value = caseItem.wifeID || '';
+            document.getElementById('phone').value = caseItem.phone;
+            document.getElementById('phone2').value = caseItem.phone2 || '';
+            document.getElementById('housingType').value = caseItem.housingType;
+            document.getElementById('fatherStatus').value = caseItem.fatherStatus;
+            document.getElementById('totalIncome').value = caseItem.totalIncome;
+            document.getElementById('incomeSource').value = caseItem.incomeSource || '';
+            document.getElementById('birthYear').value = caseItem.birthYear || '';
+            document.getElementById('age').value = caseItem.age || '';
+            document.getElementById('caseCategory').value = caseItem.category || '';
+            document.getElementById('generalNotes').value = caseItem.generalNotes || '';
+
+            // Populate Children
+            const childrenList = document.getElementById('childrenList');
+            childrenList.innerHTML = '';
+            if (caseItem.children) {
+                caseItem.children.forEach(child => {
+                    addChild(); // Adds empty inputs
+                    // Get the last added child item
+                    const items = childrenList.querySelectorAll('.child-item');
+                    const lastItem = items[items.length - 1];
+                    lastItem.querySelector('input[placeholder="اسم الطفل"]').value = child.name;
+                    lastItem.querySelector('input[placeholder="تاريخ الميلاد"]').value = child.birthDate;
+                });
+            }
+
+            // Populate Custom Fields
+            const customFieldsList = document.getElementById('customFieldsList');
+            customFieldsList.innerHTML = '';
+            if (caseItem.customFields) {
+                caseItem.customFields.forEach(field => {
+                    addCustomField();
+                    const items = customFieldsList.querySelectorAll('.custom-field-item');
+                    const lastItem = items[items.length - 1];
+                    lastItem.querySelector('input[placeholder="اسم الحقل"]').value = field.name;
+                    lastItem.querySelector('input[placeholder="القيمة"]').value = field.value;
+                });
+            }
+
+            // Set Editing State
+            editingCaseId = id;
+
+            // Scroll to Form
+            const formSection = document.getElementById('cases');
+            if (formSection) formSection.scrollIntoView({ behavior: 'smooth' });
+
+            // Update Submit Button
+            const submitBtn = document.querySelector('#caseForm button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '🔄 حفظ التعديلات';
+                submitBtn.classList.remove('btn-primary');
+                submitBtn.classList.add('btn-warning'); // Change color to indicate edit mode
+            }
+
+            showAlert('info', '📝 وضع التعديل: قم بتحديث البيانات ثم اضغط حفظ');
+        }
+
+        // Approval System (Formerly Voting)
+        function renderVotingTable() { // Kept name for compatibility, now renders Approval Table
+            const tbody = document.getElementById('votingTableBody');
+            tbody.innerHTML = '';
+
+            const pendingCases = database.cases.filter(c => c.status === 'pending');
+
+            if (pendingCases.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">لا توجد حالات معلقة (قيد الانتظار)</td></tr>';
+                return;
+            }
+
+            pendingCases.forEach(caseItem => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${caseItem.husbandName}</td>
+                    <td>${caseItem.husbandID}</td>
+                    <td>${caseItem.children.length}</td>
+                    <td>${caseItem.totalIncome} جنيه</td>
+                    <td><span class="status-badge status-pending">قيد الانتظار</span></td>
+                    <td>
+                        <button class="btn btn-success btn-sm" onclick="approveCase(${caseItem.id})">✅ اعتماد</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function approveCase(id) {
+            const caseItem = database.cases.find(c => c.id === id);
+            if (caseItem) {
+                if (confirm('هل أنت متأكد من اعتماد هذه الحالة؟')) {
+                    caseItem.status = 'approved';
+                    saveData();
+                    renderVotingTable();
+                    renderCasesTable();
+                    updateDashboard();
+                    showAlert('success', '✅ تم اعتماد الحالة بنجاح');
+                }
+            }
+        }
+
+
+
+        // Helper to get logic for smart selection
+        // ==============================
+        // SMART SELECTION Logic
+        // ==============================
+
+        function getYoungestChildAge(caseItem) {
+            if (!caseItem.children || caseItem.children.length === 0) return 999;
+            const ages = caseItem.children.map(child => {
+                const birthDate = new Date(child.birthDate);
+                const targetYear = 2026;
+                let age = targetYear - birthDate.getFullYear();
+                // Simple year difference as per request for "relative to 2026"
+                return age;
+            });
+            return Math.min(...ages);
+        }
+
+        // Helper to get youngest child info for display
+        function getYoungestChildInfo(caseItem) {
+            if (!caseItem.children || caseItem.children.length === 0) return { name: '-', age: '-' };
+
+            let youngest = caseItem.children[0];
+            let minAge = 999;
+
+            caseItem.children.forEach(child => {
+                const birthDate = new Date(child.birthDate);
+                const age = 2026 - birthDate.getFullYear();
+                if (age < minAge) {
+                    minAge = age;
+                    youngest = child;
+                }
+            });
+
+            return { name: youngest.name, age: minAge };
+        }
+
+        function isOrphan(caseItem) {
+            return caseItem.fatherStatus === 'deceased' || caseItem.fatherStatus === 'absent';
+        }
+
+        function scoreCaseByCriteria(caseItem, criterion) {
+            switch (criterion) {
+                case 'income': return -parseInt(caseItem.totalIncome || 0);
+                case 'children': return (caseItem.children ? caseItem.children.length : 0) * 100;
+                case 'orphans': return isOrphan(caseItem) ? 10000 : 0;
+                case 'youngest': return -getYoungestChildAge(caseItem) * 50;
+                default: return 0;
+            }
+        }
+
+        function sortByCombinedCriteria(cases, priorities) {
+            return cases.sort((a, b) => {
+                for (let priority of priorities) {
+                    if (!priority) continue;
+                    const scoreA = scoreCaseByCriteria(a, priority);
+                    const scoreB = scoreCaseByCriteria(b, priority);
+                    if (scoreA !== scoreB) return scoreB - scoreA;
+                }
+                return 0;
+            });
+        }
+
+        function getSmartSelectionCandidates(count, method) {
+            // Select from ALL cases that are NOT rejected (includes pending and approved)
+            const allActiveCases = database.cases.filter(c => c.status !== 'rejected');
+
+            // We will return an array of objects: { case: caseItem, child: childItem }
+            // If child is present, it means this selection is specifically for that child.
+            let selections = [];
+
+            switch (method) {
+                case 'votes':
+                    selections = allActiveCases.map(c => ({ case: c }));
+                    break;
+                case 'income':
+                    selections = allActiveCases
+                        .sort((a, b) => parseInt(a.totalIncome || 0) - parseInt(b.totalIncome || 0))
+                        .slice(0, count)
+                        .map(c => ({ case: c }));
+                    break;
+                case 'children':
+                    selections = allActiveCases
+                        .sort((a, b) => (b.children?.length || 0) - (a.children?.length || 0))
+                        .slice(0, count)
+                        .map(c => ({ case: c }));
+                    break;
+                case 'orphans':
+                    const orphans = allActiveCases.filter(c => isOrphan(c));
+                    const nonOrphans = allActiveCases.filter(c => !isOrphan(c));
+                    selections = [...orphans, ...nonOrphans]
+                        .slice(0, count)
+                        .map(c => ({ case: c }));
+                    break;
+                case 'youngest':
+                    const allChildren = [];
+                    allActiveCases.forEach(c => {
+                        if (c.children && c.children.length > 0) {
+                            c.children.forEach(child => {
+                                const birthDate = new Date(child.birthDate);
+                                allChildren.push({
+                                    case: c,
+                                    child: child,
+                                    age: 2026 - birthDate.getFullYear()
+                                });
+                            });
+                        }
+                    });
+                    selections = allChildren
+                        .sort((a, b) => a.age - b.age)
+                        .slice(0, count);
+                    break;
+                case 'combined':
+                    const p1 = document.getElementById('priority1').value;
+                    const p2 = document.getElementById('priority2').value;
+                    const p3 = document.getElementById('priority3').value;
+                    selections = sortByCombinedCriteria([...allActiveCases], [p1, p2, p3])
+                        .slice(0, count)
+                        .map(c => ({ case: c }));
+                    break;
+            }
+            return selections;
+        }
+
+        function previewSmartSelection() {
+            const count = parseInt(document.getElementById('smartSelectionCount').value);
+            const method = document.getElementById('smartSelectionMethod').value;
+
+            if (!count || count <= 0) { showAlert('error', '⚠️ أدخل العدد المطلوب'); return; }
+            if (!method) { showAlert('error', '⚠️ اختر طريقة الفرز'); return; }
+
+            const candidates = getSmartSelectionCandidates(count, method);
+            if (candidates.length === 0) { showAlert('warning', '⚠️ لا توجد حالات مطابقة'); return; }
+
+            displaySelectionPreview(candidates);
+        }
+
+        function displaySelectionPreview(selections) {
+            const previewSection = document.getElementById('smartSelectionPreview');
+            const tbody = document.getElementById('smartSelectionPreviewBody');
+            const summaryDiv = document.getElementById('selectionSummary');
+
+            tbody.innerHTML = '';
+            selections.forEach((item, index) => {
+                const method = document.getElementById('smartSelectionMethod').value;
+                let nameCellContent = '';
+
+                if (method === 'youngest' && item.child) {
+                    // Show ONLY this specific child info
+                    nameCellContent = `
+                        <div style="color: var(--primary); font-weight: 500;">👶 ${item.child.name} (${item.age} سنة)</div>
+                        <div style="font-size:0.8em; color:#888;">(تابع لـ: ${item.case.husbandName})</div>
+                    `;
+                } else if (method === 'youngest') {
+                    // Show ONLY children names for 'youngest' method as requested
+                    if (item.case.children && item.case.children.length > 0) {
+                        nameCellContent = item.case.children.map(child => {
+                            const birthDate = new Date(child.birthDate);
+                            const age = 2026 - birthDate.getFullYear();
+                            return `<div style="color: var(--primary); font-weight: 500;">👶 ${child.name} (${age} سنة)</div>`;
+                        }).join('');
+                    } else {
+                        nameCellContent = `<div style="color: #999;">(لا يوجد أطفال)</div>`;
+                    }
+                } else {
+                    // Default behavior: Parent name + optionally children info
+                    let extraInfo = '';
+                    if (method === 'combined') {
+                        if (item.case.children && item.case.children.length > 0) {
+                            const childrenDetails = item.case.children.map(child => {
+                                const birthDate = new Date(child.birthDate);
+                                const age = 2026 - birthDate.getFullYear();
+                                return `<div style="margin-right:10px;">👶 ${child.name} (${age} سنة)</div>`;
+                            }).join('');
+                            extraInfo = `<div style="font-size: 0.85em; color: var(--text-secondary); margin-top:5px; border-top:1px dashed #eee; padding-top:4px;">${childrenDetails}</div>`;
+                        }
+                    }
+
+                    nameCellContent = `
+                        <div style="font-weight:bold; color:var(--primary);">${item.case.husbandName}</div>
+                        ${extraInfo}
+                    `;
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${nameCellContent}</td>
+                    <td>${item.case.husbandID}</td>
+                    <td>${item.case.children ? item.case.children.length : 0}</td>
+                    <td>${item.case.phone || '-'}</td>
+                    <td>${isOrphan(item.case) ? 'نعم' : 'لا'}</td>
+                    <td>${getStatusText(item.case.status)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            summaryDiv.innerHTML = `<div>تم اختيار ${selections.length} بند</div>`;
+            previewSection.style.display = 'block';
+            previewSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function executeSmartSelection() {
+            const count = parseInt(document.getElementById('smartSelectionCount').value);
+            const method = document.getElementById('smartSelectionMethod').value;
+
+            if (!count || !method) { showAlert('error', '⚠️ أكمل البيانات'); return; }
+
+            if (!confirm(`هل أنت متأكد من اعتماد البنود المختارة؟`)) return;
+
+            const selections = getSmartSelectionCandidates(count, method);
+            selections.forEach(item => {
+                if (item.case) item.case.status = 'approved';
+            });
+
+            saveData();
+            updateDashboard();
+            renderVotingTable();
+            renderCasesTable();
+
+            document.getElementById('smartSelectionPreview').style.display = 'none';
+            showAlert('success', `✅ تم اعتماد ${selections.length} بند بنجاح`);
+        }
+
+        // Distribution System
+        // ==============================
+        // NEW AID DISTRIBUTION SYSTEM
+        // ==============================
+
+        function addNewAidType() {
+            const input = document.getElementById('newAidTypeInput');
+            const newType = input.value.trim();
+
+            if (!newType) {
+                showAlert('error', '⚠️ الرجاء إدخال اسم المساعدة');
+                return;
+            }
+
+            if (!database.aidTypes) database.aidTypes = [];
+
+            if (database.aidTypes.includes(newType)) {
+                showAlert('error', '⚠️ هذا النوع موجود بالفعل');
+                return;
+            }
+
+            database.aidTypes.push(newType);
+            saveData();
+
+            input.value = '';
+            renderAidTypeSelect();
+            renderAidManagementList();
+            showAlert('success', '✅ تم إضافة نوع المساعدة بنجاح');
+        }
+
+        function deleteAidType(name) {
+            if (!confirm(`هل أنت متأكد من حذف نوع المساعدة "${name}"؟\nسيتم حذفه من القوائم فقط ولن تتأثر سجلات التسليم السابقة.`)) return;
+
+            database.aidTypes = database.aidTypes.filter(t => t !== name);
+            saveData();
+            renderAidTypeSelect();
+            renderAidManagementList();
+            showAlert('success', '✅ تم حذف النوع بنجاح');
+        }
+
+        function editAidType(oldName) {
+            const newName = prompt(`تعديل اسم المساعدة "${oldName}" إلى:`, oldName);
+            if (!newName || newName.trim() === '' || newName === oldName) return;
+
+            if (database.aidTypes.includes(newName.trim())) {
+                showAlert('error', '⚠️ هذا الاسم موجود بالفعل');
+                return;
+            }
+
+            // Update in aidTypes list
+            const index = database.aidTypes.indexOf(oldName);
+            if (index !== -1) {
+                database.aidTypes[index] = newName.trim();
+            }
+
+            // Update in all cases receivedHistory
+            database.cases.forEach(c => {
+                if (c.receivedHistory) {
+                    c.receivedHistory.forEach(h => {
+                        if (h.type === oldName) h.type = newName.trim();
+                    });
+                }
+            });
+
+            saveData();
+            renderAidTypeSelect();
+            renderAidManagementList();
+            showAlert('success', '✅ تم تعديل الاسم بنجاح وتحديث السجلات المرتبطة');
+        }
+
+        function renderAidManagementList() {
+            const tbody = document.getElementById('aidTypesManagementBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (!database.aidTypes || database.aidTypes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="text-center">لا توجد أنواع مساعدات مضافة</td></tr>';
+                return;
+            }
+
+            database.aidTypes.forEach(type => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${type}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editAidType('${type}')">✏️ تعديل</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteAidType('${type}')">🗑️ حذف</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderAidTypeSelect() {
+            const select = document.getElementById('aidTypeSelect');
+            const reportSelect = document.getElementById('reportAidType');
+
+            // Helper to populate a select element
+            const populate = (el) => {
+                if (!el) return;
+                // Keep the first option
+                const firstOption = el.options[0];
+                el.innerHTML = '';
+                el.appendChild(firstOption);
+
+                if (database.aidTypes) {
+                    database.aidTypes.forEach(type => {
+                        const option = document.createElement('option');
+                        option.value = type;
+                        option.textContent = type;
+                        el.appendChild(option);
+                    });
+                }
+            };
+
+            populate(select);
+            populate(reportSelect);
+            renderAidManagementList();
+        }
+
+        function renderDistributionLists() {
+            const selectedType = document.getElementById('aidTypeSelect').value;
+            const container = document.getElementById('deliveryLists');
+
+            if (!selectedType) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+
+            const notReceivedBody = document.getElementById('notReceivedTableBody');
+            const receivedBody = document.getElementById('receivedTableBody');
+
+            notReceivedBody.innerHTML = '';
+            receivedBody.innerHTML = '';
+
+            // Get only Approved cases
+            const approvedCases = database.cases.filter(c => c.status === 'approved');
+
+            approvedCases.forEach(caseItem => {
+                const hasReceived = caseItem.receivedHistory &&
+                    caseItem.receivedHistory.some(h => h.type === selectedType);
+
+                if (hasReceived) {
+                    // Render in Received Table
+                    const record = caseItem.receivedHistory.find(h => h.type === selectedType);
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${caseItem.husbandName}</td>
+                        <td>${caseItem.phone}</td>
+                        <td>${caseItem.husbandID}</td>
+                        <td>${new Date(record.date).toLocaleDateString('ar-EG')}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" title="إلغاء الاستلام" onclick="cancelAidDelivery(${caseItem.id}, '${selectedType}')">
+                                ✕ إلغاء
+                            </button>
+                        </td>
+                    `;
+                    receivedBody.appendChild(tr);
+                } else {
+                    // Render in Not Received Table
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${caseItem.husbandName}</td>
+                        <td>${caseItem.phone}</td>
+                        <td>${caseItem.husbandID}</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" onclick="deliverAid(${caseItem.id}, '${selectedType}')">
+                                📦 تسليم
+                            </button>
+                        </td>
+                    `;
+                    notReceivedBody.appendChild(tr);
+                }
+            });
+        }
+
+        function deliverAid(caseId, aidType) {
+            const caseItem = database.cases.find(c => c.id === caseId);
+            if (!caseItem) return;
+
+            if (!caseItem.receivedHistory) {
+                caseItem.receivedHistory = [];
+            }
+
+            caseItem.receivedHistory.push({
+                type: aidType,
+                date: new Date().toISOString()
+            });
+
+            saveData();
+            renderDistributionLists();
+            showAlert('success', `✅ تم تسليم ${aidType} بنجاح للحالة: ${caseItem.husbandName}`);
+        }
+
+        function cancelAidDelivery(caseId, aidType) {
+            const caseItem = database.cases.find(c => c.id === caseId);
+            if (!caseItem || !caseItem.receivedHistory) return;
+
+            if (confirm(`هل أنت متأكد من إلغاء استلام "${aidType}" لهذه الحالة؟`)) {
+                caseItem.receivedHistory = caseItem.receivedHistory.filter(h => h.type !== aidType);
+                saveData();
+                renderDistributionLists();
+                showAlert('warning', `⚠️ تم إلغاء استلام ${aidType}`);
+            }
+        }
+
+        // Reports
+        function generateCaseReport() {
+            const nationalID = document.getElementById('reportNationalID').value;
+            if (!nationalID) {
+                showAlert('error', '⚠️ الرجاء إدخال الرقم القومي');
+                return;
+            }
+
+            const caseItem = database.cases.find(c => c.husbandID === nationalID || c.wifeID === nationalID);
+            if (!caseItem) {
+                showAlert('error', '❌ لم يتم العثور على الحالة');
+                return;
+            }
+
+            // User requested the result to be a "popup"
+            // We reuse the existing viewCase function which displays full details + history in a modal
+            viewCase(caseItem.id);
+
+            // Clear any previous inline results if they exist to avoid confusion
+            const resultDiv = document.getElementById('caseReportResult');
+            if (resultDiv) resultDiv.innerHTML = '';
+        }
+
+        function generateStatsReport() {
+            const fromDateVal = document.getElementById('reportFromDate').value;
+            const toDateVal = document.getElementById('reportToDate').value;
+            const selectedAidType = document.getElementById('reportAidType').value;
+
+            let fromDate = fromDateVal ? new Date(fromDateVal) : null;
+            let toDate = toDateVal ? new Date(toDateVal) : null;
+
+            // Normalize dates to ensure inclusive range
+            if (fromDate) fromDate.setHours(0, 0, 0, 0);
+            if (toDate) toDate.setHours(23, 59, 59, 999);
+
+            let reportData = [];
+
+            // Aggregate all received history from all cases
+            database.cases.forEach(c => {
+                if (c.receivedHistory && c.receivedHistory.length > 0) {
+                    c.receivedHistory.forEach(h => {
+                        const hDate = new Date(h.date);
+
+                        let include = true;
+                        if (fromDate && hDate < fromDate) include = false;
+                        if (toDate && hDate > toDate) include = false;
+                        if (selectedAidType && h.type !== selectedAidType) include = false;
+
+                        if (include) {
+                            reportData.push({
+                                husbandName: c.husbandName,
+                                nationalID: c.husbandID,
+                                phone: c.phone,
+                                aidType: h.type,
+                                date: hDate
+                            });
+                        }
+                    });
+                }
+            });
+
+            // Sort by date descending (newest first)
+            reportData.sort((a, b) => b.date - a.date);
+
+            const resultDiv = document.getElementById('statsReportResult');
+            const title = selectedAidType ? `تقرير توزيع: ${selectedAidType}` : `تقرير توزيع عام`;
+
+            resultDiv.innerHTML = `
+                <div class="form-section">
+                    <h3 class="section-title">${title} (${reportData.length})</h3>
+                    
+                    ${reportData.length > 0 ? `
+                        <div class="table-container mt-3">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>اسم المستفيد</th>
+                                        <th>رقم الهاتف</th>
+                                        <th>الرقم القومي</th>
+                                        <th>تاريخ الاستلام</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${reportData.map(d => `
+                                        <tr>
+                                            <td>${d.husbandName}</td>
+                                            <td>${d.phone}</td>
+                                            <td>${d.nationalID}</td>
+                                            <td>${d.date.toLocaleDateString('ar-EG')}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    ` : '<div class="alert alert-info mt-3">لا توجد عمليات توزيع مطابقة</div>'}
+                </div>
+            `;
+        }
+
+        function exportToExcel() {
+            // Priority to Stats Report 
+            const statsDiv = document.getElementById('statsReportResult');
+            const statsTable = statsDiv.querySelector('table');
+
+            if (statsTable) {
+                // Export Distribution Stats Table
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.table_to_sheet(statsTable);
+                XLSX.utils.book_append_sheet(wb, ws, "Distribution Stats");
+                XLSX.writeFile(wb, "distribution_stats.xlsx");
+                showAlert('success', '✅ تم تحميل ملف Excel بنجاح');
+                return;
+            }
+
+            // Check if Case Modal is open
+            const modal = document.getElementById('caseModal');
+            if (modal.classList.contains('active')) {
+                // If modal is open, we can try to find a history table or just export basic info
+                const historyTable = modal.querySelector('table');
+                if (historyTable) {
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.table_to_sheet(historyTable);
+                    XLSX.utils.book_append_sheet(wb, ws, "Case Aid History");
+                    XLSX.writeFile(wb, "case_history.xlsx");
+                    showAlert('success', '✅ تم تحميل سجل المساعدات كملف Excel');
+                    return;
+                } else {
+                    // Maybe just export the basic details text? simpler to just say no table found
+                    showAlert('warning', '⚠️ لا يوجد جدول بيانات في النافذة الحالية للتصدير.');
+                    return;
+                }
+            }
+
+            showAlert('warning', '⚠️ لا يوجد تقرير معروض حالياً للتصدير. قم بإنشاء تقرير إحصائي أولاً.');
+        }
+
+        function exportToPDF() {
+            let elementToExport = null;
+            let filename = 'report.pdf';
+
+            const modal = document.getElementById('caseModal');
+            const statsDiv = document.getElementById('statsReportResult');
+
+            // 1. Check if Modal is Open (Priority)
+            if (modal && modal.classList.contains('active')) {
+                // Use the modal-content card which has the white background
+                elementToExport = modal.querySelector('.modal-content');
+                filename = 'case_details.pdf';
+            }
+            // 2. Check if Stats Report is visible and populated
+            else if (statsDiv && statsDiv.innerHTML.trim().length > 20) {
+                elementToExport = statsDiv;
+                filename = 'distribution_stats.pdf';
+            }
+
+            if (!elementToExport) {
+                showAlert('warning', '⚠️ لا يوجد تقرير معروض حالياً للتصدير.');
+                return;
+            }
+
+            const opt = {
+                margin: 0.5,
+                filename: filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, // scrollY:0 helps with modals
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(elementToExport).save().then(() => {
+                showAlert('success', '✅ تم تحميل ملف PDF بنجاح');
+            }).catch(err => {
+                console.error(err);
+                showAlert('error', '❌ حدث خطأ أثناء التصدير');
+            });
+        }
+
+        // Alert System
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert - ${type}`;
+            alertDiv.textContent = message;
+
+            const mainContent = document.querySelector('.main-content');
+            mainContent.insertBefore(alertDiv, mainContent.firstChild);
+
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }
+
+        // Initialize
+        window.addEventListener('load', function () {
+            loadData();
+        });
+
+        // Search Distribution
+        document.getElementById('searchDistribution').addEventListener('input', function (e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#distributionTableBody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    </script>
+
+    <!-- الميزات الذكية المدمجة -->
+    <script>
+        // ==============================
+        // Enhanced Features for Charity Management System
+        // ==============================
+
+        // Smart Selection Method Change Handler
+        document.addEventListener('DOMContentLoaded', function () {
+            const methodSelect = document.getElementById('smartSelectionMethod');
+            const combinedSection = document.getElementById('combinedCriteriaSection');
+
+            if (methodSelect && combinedSection) {
+                methodSelect.addEventListener('change', function () {
+                    if (this.value === 'combined') {
+                        combinedSection.style.display = 'block';
+                    } else {
+                        combinedSection.style.display = 'none';
+                    }
+                });
+            }
+        });
+
+        // ==============================
+        // ENHANCED EXCEL IMPORT
+        // ==============================
+
+        // Enhanced Excel file handler - handles files starting from row 1
+        function handleFileEnhanced(file) {
+            const validTypes = [
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.ms-excel',
+                'text/csv'
+            ];
+
+            if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls|csv)$/i)) {
+                showAlert('error', '⚠️ نوع الملف غير صحيح. الرجاء اختيار ملف Excel (.xlsx, .xls) أو CSV');
+                return;
+            }
+
+            const reader = new FileReader();
+
+            document.getElementById('progressContainer').classList.add('active');
+            document.getElementById('progressFill').style.width = '30%';
+            document.getElementById('progressFill').textContent = '30%';
+
+            reader.onload = function (e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    document.getElementById('progressFill').style.width = '60%';
+                    document.getElementById('progressFill').textContent = '60%';
+
+                    // Get first sheet
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+
+                    // IMPORTANT: Read from row 1 (not row 2)
+                    // The first row contains the headers
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
+                        defval: '', // Default value for empty cells
+                        raw: false  // Convert dates to strings
+                    });
+
+                    document.getElementById('progressFill').style.width = '90%';
+                    document.getElementById('progressFill').textContent = '90%';
+
+                    if (!jsonData || jsonData.length === 0) {
+                        showAlert('error', '⚠️ الملف فارغ. تأكد من أن الصف الأول يحتوي على العناوين والبيانات تبدأ من الصف الثاني');
+                        document.getElementById('progressContainer').classList.remove('active');
+                        return;
+                    }
+
+                    processImportedData(jsonData);
+
+                    document.getElementById('progressFill').style.width = '100%';
+                    document.getElementById('progressFill').textContent = '100%';
+
+                    setTimeout(() => {
+                        document.getElementById('progressContainer').classList.remove('active');
+                    }, 1000);
+
+                } catch (error) {
+                    console.error('Error reading file:', error);
+                    showAlert('error', '❌ خطأ في قراءة الملف: ' + error.message);
+                    document.getElementById('progressContainer').classList.remove('active');
+                }
+            };
+
+            reader.onerror = function () {
+                showAlert('error', '❌ خطأ في قراءة الملف');
+                document.getElementById('progressContainer').classList.remove('active');
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Enhanced column finder - more flexible matching
+        function findMatchingColumnEnhanced(columns, expectedName) {
+            // Direct matches
+            const directMatches = {
+                'اسم الزوج': ['اسم الزوج', 'الاسم', 'اسم', 'name', 'husband_name', 'husband'],
+                'الرقم القومي': ['الرقم القومي', 'رقم قومي', 'رقم', 'national_id', 'id', 'ssn'],
+                'اسم الزوجة': ['اسم الزوجة', 'الزوجة', 'wife_name', 'wife'],
+                'رقم قومي زوجة': ['رقم قومي زوجة', 'رقم الزوجة', 'wife_id'],
+                'رقم الهاتف': ['رقم الهاتف', 'الهاتف', 'تليفون', 'موبايل', 'phone', 'mobile', 'tel'],
+                'الدخل الشهري': ['الدخل الشهري', 'الدخل', 'دخل', 'income', 'monthly_income'],
+                'نوع السكن': ['نوع السكن', 'السكن', 'housing', 'house_type'],
+                'حالة الأب': ['حالة الأب', 'الأب', 'father_status', 'father'],
+                'عدد الأطفال': ['عدد الأطفال', 'الأطفال', 'children_count', 'children', 'kids'],
+                'ملاحظات': ['ملاحظات', 'notes', 'comments', 'remarks']
+            };
+
+            const possibleNames = directMatches[expectedName] || [expectedName];
+
+            for (const name of possibleNames) {
+                // Try exact match (case-insensitive)
+                const match = columns.find(col =>
+                    col.trim().toLowerCase() === name.toLowerCase()
+                );
+                if (match) return match;
+            }
+
+            // Try partial match
+            for (const name of possibleNames) {
+                const match = columns.find(col =>
+                    col.toLowerCase().includes(name.toLowerCase()) ||
+                    name.toLowerCase().includes(col.toLowerCase())
+                );
+                if (match) return match;
+            }
+
+            return '';
+        }
+
+        // Create Distribution Campaign
+        function createDistribution() {
+            const name = document.getElementById('aidName').value;
+            const type = document.getElementById('aidType').value;
+            const donor = document.getElementById('donorOrg').value;
+            const description = document.getElementById('aidDescription').value;
+
+            if (!name || !type || !donor) {
+                alert('الرجاء إدخال جميع الحقول المطلوبة');
+                return;
+            }
+
+            // إضافة جميع الحالات المعتمدة كمستفيدين
+            const approvedCases = database.cases.filter(c => c.status === 'approved');
+            const beneficiaries = approvedCases.map(c => ({
+                caseId: c.id,
+                receivedAt: null
+            }));
+
+            const distribution = {
+                id: Date.now(),
+                name: name,
+                type: type,
+                donor: donor,
+                description: description,
+                date: new Date().toISOString(),
+                beneficiaries: beneficiaries,
+                status: 'active'
+            };
+
+            database.distributions.push(distribution);
+            saveData();
+
+            // مسح الحقول تلقائياً بعد الإضافة  
+            document.getElementById('aidName').value = '';
+            document.getElementById('aidType').value = '';
+            document.getElementById('donorOrg').value = '';
+            document.getElementById('aidDescription').value = '';
+
+            showAlert('success', `✅ تم إضافة حملة "${name}" بنجاح.يمكنك إضافة حملة جديدة.`);
+            renderPastDistributions();
+            renderCampaignSelect();
+            updateDashboard();
+        }
+
+        // Render Campaign Select Dropdown
+        function renderCampaignSelect() {
+            const select = document.getElementById('selectedCampaign');
+            if (!select) return;
+
+            select.innerHTML = '<option value="">-- اختر الحملة --</option>';
+            database.distributions.forEach(dist => {
+                const option = document.createElement('option');
+                option.value = dist.id;
+                option.textContent = dist.name;
+                select.appendChild(option);
+            });
+        }
+
+        // Load Campaign Cases
+        function loadCampaignCases() {
+            const campaignId = document.getElementById('selectedCampaign').value;
+
+            if (!campaignId) {
+                document.getElementById('notReceivedSection').style.display = 'none';
+                document.getElementById('receivedSection').style.display = 'none';
+                return;
+            }
+
+            const campaign = database.distributions.find(d => d.id == campaignId);
+            if (!campaign) return;
+
+            // إظهار الجدولين
+            document.getElementById('notReceivedSection').style.display = 'block';
+            document.getElementById('receivedSection').style.display = 'block';
+
+            // تقسيم الحالات
+            const notReceivedBody = document.getElementById('notReceivedBody');
+            const receivedBody = document.getElementById('receivedBody');
+            notReceivedBody.innerHTML = '';
+            receivedBody.innerHTML = '';
+
+            campaign.beneficiaries.forEach(beneficiary => {
+                const caseData = database.cases.find(c => c.id === beneficiary.caseId);
+                if (!caseData) return;
+
+                const row = document.createElement('tr');
+
+                if (!beneficiary.receivedAt) {
+                    // لم يستلم
+                    row.innerHTML = `
+            < td > ${caseData.husbandName || 'غير محدد'}</td >
+                        <td>${caseData.husbandID || '-'}</td>
+                        <td>${caseData.phone || '-'}</td>
+                        <td>
+                            <button class="btn btn-success btn-sm" onclick="confirmReceipt(${campaignId}, ${caseData.id})">
+                                ✅ تأكيد الاستلام
+                            </button>
+                        </td>
+        `;
+                    notReceivedBody.appendChild(row);
+                } else {
+                    // تم التسليم
+                    const receivedDate = new Date(beneficiary.receivedAt).toLocaleString('ar-EG');
+                    row.innerHTML = `
+            < td > ${caseData.husbandName || 'غير محدد'}</td >
+                        <td>${caseData.husbandID || '-'}</td>
+                        <td>${caseData.phone || '-'}</td>
+                        <td>${receivedDate}</td>
+        `;
+                    receivedBody.appendChild(row);
+                }
+            });
+
+            // إذا كانت الجداول فارغة، إضافة رسالة
+            if (notReceivedBody.children.length === 0) {
+                notReceivedBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-secondary);">جميع الحالات استلمت المساعدة ✅</td></tr>';
+            }
+            if (receivedBody.children.length === 0) {
+                receivedBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-secondary);">لا توجد حالات استلمت بعد</td></tr>';
+            }
+        }
+
+        // Confirm Receipt
+        function confirmReceipt(campaignId, caseId) {
+            const campaign = database.distributions.find(d => d.id == campaignId);
+            if (!campaign) return;
+
+            const beneficiary = campaign.beneficiaries.find(b => b.caseId === caseId);
+            if (!beneficiary) return;
+
+            // تحديث حالة الاستلام
+            beneficiary.receivedAt = new Date().toISOString();
+            saveData();
+
+            // إعادة تحميل الجداول
+            loadCampaignCases();
+
+            showAlert('success', '✅ تم تأكيد الاستلام بنجاح');
+        }
+
+        // Show Alert
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert - ${type} `;
+            alertDiv.innerHTML = `
+            < span > ${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span >
+                <span>${message}</span>
+            `;
+
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                mainContent.insertBefore(alertDiv, mainContent.firstChild);
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 5000);
+            }
+        }
+
+        // Backup & Restore System
+        function exportFullBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(database));
+            const downloadAnchorNode = document.createElement('a');
+            const date = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", `charity_backup_${date}.json`);
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            showAlert('success', '✅ تم استخراج النسخة الاحتياطية بنجاح. يمكنك الآن رفع هذا الملف إلى Google Drive');
+        }
+
+        function importFullBackup(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            if (!confirm('⚠️ تحذير: استعادة نسخة احتياطية سيؤدي إلى مسح كافة البيانات الحالية واستبدالها بالبيانات الموجودة في الملف. هل تريد الاستمرار؟')) {
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+
+                    // Validation: must have cases array
+                    if (!importedData || !importedData.cases || !Array.isArray(importedData.cases)) {
+                        throw new Error('الملف المختار ليس نسخة احتياطية صالحة لهذا النظام.');
+                    }
+
+                    database = importedData;
+                    saveData();
+
+                    showAlert('success', '✅ تم استعادة كافة البيانات بنجاح! سيتم تحديث النظام الآن...');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+
+                } catch (err) {
+                    console.error(err);
+                    showAlert('error', '❌ فشل استعادة البيانات: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Export functions for global use
+        window.exportFullBackup = exportFullBackup;
+        window.importFullBackup = importFullBackup;
+        window.previewSmartSelection = previewSmartSelection;
+        window.executeSmartSelection = executeSmartSelection;
+        window.handleFileEnhanced = handleFileEnhanced;
+        window.findMatchingColumnEnhanced = findMatchingColumnEnhanced;
+        window.getYoungestChildAge = getYoungestChildAge;
+        window.isOrphan = isOrphan;
+        window.editCase = editCase;
+        window.deleteCase = deleteCase;
+        window.viewCase = viewCase;
+        window.resetForm = resetForm;
+        window.deliverAid = deliverAid;
+        window.approveCase = approveCase;
+        window.editAidType = editAidType;
+        window.deleteAidType = deleteAidType;
+        window.renderAidManagementList = renderAidManagementList;
+        window.cancelAidDelivery = cancelAidDelivery;
+
+    </script>
+
+    <script>
+        // Search Distribution
+        const searchDistInput = document.getElementById('searchDistribution');
+        if (searchDistInput) {
+            searchDistInput.addEventListener('input', function (e) {
+                const searchTerm = e.target.value.toLowerCase();
+
+                // Filter Not Received Table
+                const rows1 = document.querySelectorAll('#notReceivedTableBody tr');
+                rows1.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+
+                // Filter Received Table
+                const rows2 = document.querySelectorAll('#receivedTableBody tr');
+                rows2.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

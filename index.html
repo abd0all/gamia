@@ -1661,7 +1661,7 @@
 
     <script>
         // Database Simulation
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwW6R-NTv8_y7MjeGn2yXrAomTwtWGj2MzGKfUZW-YOrwHTabC2lqJATEtbG1MieEc-dQ/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyKjoHYDLz3Wz7uEV6S6hrWHfIkMThejDEeJ0WhTv2rSyEIPz1J3FhnL-arFN-vaxvvAw/exec';
         let isSyncing = false;
 
         let database = {
@@ -1802,7 +1802,11 @@
 
                 // Since no-cors doesn't return response body, we assume success if no error
                 showSyncStatus('success', 'تمت المزامنة السحابية بنجاح ✅');
-                console.log("Cloud sync completed.");
+                console.log("Cloud sync completed. Fetching merged data...");
+
+                // CRITICAL FOR MULTI-DEVICE: After saving, fetch again to get the server-side merged data
+                // This ensures that if another device saved in the meantime, we get their changes too.
+                setTimeout(() => fetchFromCloud(), 500);
             } catch (error) {
                 console.error('Sync Error:', error);
                 showSyncStatus('error', 'فشل المزامنة السحابية ❌');
@@ -2094,7 +2098,7 @@
             });
 
             const caseData = {
-                id: editingCaseId ? editingCaseId : Date.now(),
+                id: editingCaseId ? editingCaseId : Date.now() + Math.floor(Math.random() * 1000),
                 husbandName: document.getElementById('husbandName').value,
                 husbandID: document.getElementById('husbandID').value,
                 wifeName: document.getElementById('wifeName').value,
@@ -2180,6 +2184,14 @@
                 }
             });
             document.getElementById('totalDistributions').textContent = totalDist;
+
+            // Update Sync Time
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+            const syncStatusIcon = document.querySelector('.sync-btn');
+            if (syncStatusIcon) {
+                syncStatusIcon.title = `آخر مزامنة: ${timeStr}`;
+            }
 
             // Update monthly summary
             renderMonthlySummary();
@@ -3667,7 +3679,7 @@
             const file = input.files[0];
             if (!file) return;
 
-            if (!confirm('⚠️ هل تريد دمج البيانات من هذا الملف مع البيانات الحالية؟\nسيتم إضافة الحالات الجديدة فقط، ولن يتم تكرار الحالات الموجودة بالفعل (بناءً على الاسم والرقم القومي).')) {
+            if (!confirm('⚠️ هل تريد دمج البيانات من هذا الملف مع البيانات الحالية؟\nسيتم إضافة الحالات الجديدة غير الموجودة مسبقاً.')) {
                 input.value = '';
                 return;
             }
@@ -3675,74 +3687,122 @@
             const reader = new FileReader();
             reader.onload = function (e) {
                 try {
-                    const importedData = JSON.parse(e.target.result);
+                    let text = e.target.result;
+                    let importedData;
 
-                    if (!importedData || !importedData.cases || !Array.isArray(importedData.cases)) {
-                        throw new Error('الملف المختار ليس نسخة احتياطية صالحة لهذا النظام.');
+                    try {
+                        importedData = JSON.parse(text);
+                    } catch (pErr) {
+                        throw new Error('الملف ليس بتنسيق JSON صحيح. تأكد من سلامة الملف.');
+                    }
+
+                    let importedCases = [];
+
+                    // Recursive search for anything that looks like a cases array
+                    function findCases(obj) {
+                        if (Array.isArray(obj)) {
+                            // If it's an array, check if items look like cases
+                            if (obj.length > 0) {
+                                let first = obj[0];
+                                if (first.husbandName || first.name || first.husbandID || first.wifeName) {
+                                    return obj;
+                                }
+                            }
+                        }
+                        if (typeof obj === 'object' && obj !== null) {
+                            for (let key in obj) {
+                                let result = findCases(obj[key]);
+                                if (result) return result;
+                            }
+                        }
+                        return null;
+                    }
+
+                    importedCases = findCases(importedData);
+
+                    if (!importedCases || importedCases.length === 0) {
+                        // Attempt one last logical fallback: if it's an object with a very large array
+                        if (typeof importedData === 'object') {
+                            for (let key in importedData) {
+                                if (Array.isArray(importedData[key]) && importedData[key].length > 0) {
+                                    importedCases = importedData[key];
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!importedCases || importedCases.length === 0) {
+                        throw new Error('لم يتم العثور على أي بيانات "حالات" داخل الملف. يرجى التأكد من أن الملف يحتوي على قائمة بيانات الحالات.');
                     }
 
                     let newCasesCount = 0;
                     let duplicateCount = 0;
                     let duplicateNames = [];
 
-                    // Merge Cases
-                    importedData.cases.forEach(impCase => {
+                    importedCases.forEach(impCase => {
+                        // Normalize field names if they come from a different system
+                        const hName = impCase.husbandName || impCase.name || impCase.fullname || "";
+                        const hID = impCase.husbandID || impCase.idNumber || impCase.nationalId || "";
+                        const hPhone = impCase.phone || impCase.tel || "";
+
+                        if (!hName && !hID) return; // Skip empty entries
+
                         const isDuplicate = database.cases.some(existingCase =>
-                            existingCase.husbandID === impCase.husbandID &&
-                            existingCase.husbandName === impCase.husbandName
+                            (hID && existingCase.husbandID === hID) ||
+                            (existingCase.husbandName === hName && existingCase.phone === hPhone)
                         );
 
                         if (!isDuplicate) {
-                            // Ensure ID uniqueness for the local session if needed
-                            if (database.cases.some(c => c.id === impCase.id)) {
-                                impCase.id = Date.now() + Math.floor(Math.random() * 1000);
-                            }
-                            database.cases.push(impCase);
+                            // Ensure the object has the required structure for our system
+                            const newCase = {
+                                id: impCase.id || (Date.now() + Math.floor(Math.random() * 100000)),
+                                husbandName: hName,
+                                husbandID: hID,
+                                wifeName: impCase.wifeName || "",
+                                wifeID: impCase.wifeID || "",
+                                phone: hPhone,
+                                phone2: impCase.phone2 || "",
+                                housingType: impCase.housingType || "غير محدد",
+                                fatherStatus: impCase.fatherStatus || "غير محدد",
+                                totalIncome: impCase.totalIncome || 0,
+                                incomeSource: impCase.incomeSource || "",
+                                birthYear: impCase.birthYear || "",
+                                age: impCase.age || "",
+                                category: impCase.category || "general",
+                                generalNotes: impCase.generalNotes || "",
+                                children: impCase.children || [],
+                                customFields: impCase.customFields || [],
+                                receivedHistory: impCase.receivedHistory || [],
+                                status: impCase.status || 'pending',
+                                votes: impCase.votes || { approve: 0, reject: 0, abstain: 0 },
+                                createdAt: impCase.createdAt || new Date().toISOString()
+                            };
+
+                            database.cases.push(newCase);
                             newCasesCount++;
                         } else {
                             duplicateCount++;
-                            if (duplicateNames.length < 5) duplicateNames.push(impCase.husbandName);
+                            if (duplicateNames.length < 5) duplicateNames.push(hName || "حالة مجهولة");
                         }
                     });
 
-                    // Merge Categories
-                    if (importedData.categories) {
-                        importedData.categories.forEach(impCat => {
-                            if (!database.categories.some(cat => cat.id === impCat.id || cat.name === impCat.name)) {
-                                database.categories.push(impCat);
-                            }
-                        });
-                    }
-
-                    // Merge Aid Types
-                    if (importedData.aidTypes) {
-                        importedData.aidTypes.forEach(impType => {
-                            const typeName = typeof impType === 'string' ? impType : impType.name;
-                            if (!database.aidTypes.some(t => (typeof t === 'string' ? t : t.name) === typeName)) {
-                                database.aidTypes.push(impType);
-                            }
-                        });
-                    }
-
                     saveData();
 
-                    let msg = `✅ تمت العملية بنجاح!\n- تم إضافة ${newCasesCount} حالة جديدة.`;
+                    let msg = `✅ تمت عملية الاستيراد بنجاح!\n- تم إضافة ${newCasesCount} حالة جديدة.`;
                     if (duplicateCount > 0) {
-                        msg += `\n- تم العثور على ${duplicateCount} حالة مكررة وتجاهلها لعدم التكرار.`;
+                        msg += `\n- تم تجاهل ${duplicateCount} حالة موجودة مسبقاً.`;
                         if (duplicateNames.length > 0) {
-                            msg += `\n(مثل: ${duplicateNames.join('، ')}${duplicateCount > 5 ? '...' : ''})`;
+                            msg += `\n(مثل: ${duplicateNames.join('، ')})`;
                         }
                     }
 
                     showAlert('success', msg);
-
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 3000);
+                    setTimeout(() => window.location.reload(), 3000);
 
                 } catch (err) {
-                    console.error(err);
-                    showAlert('error', '❌ فشل دمج البيانات: ' + err.message);
+                    console.error('Import Error:', err);
+                    showAlert('error', '❌ عذراً، فشل الاستيراد: ' + err.message);
                 }
             };
             reader.readAsText(file);

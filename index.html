@@ -1076,10 +1076,149 @@
                 font-size: 0.9rem;
             }
         }
+
+        /* Login Page Styles */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1565C0 0%, #1976D2 50%, #FB8C00 100%);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .login-overlay.hidden {
+            display: none;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.6s ease-out;
+            text-align: center;
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            object-fit: cover;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .login-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .login-form .form-group {
+            margin-bottom: 1.2rem;
+            text-align: right;
+        }
+
+        .login-form .form-input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            font-size: 1rem;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .login-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
+        }
+
+        .login-error {
+            color: var(--accent);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.3s ease;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 80, 80, 0.6);
+            border-color: rgba(255, 80, 80, 0.8);
+            transform: scale(1.05);
+        }
     </style>
 </head>
 
 <body>
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-card">
+            <img src="logo association.jpeg" alt="Logo" class="login-logo">
+            <h1 class="login-title">نظام إدارة الجمعية</h1>
+            <p class="login-subtitle">يرجى تسجيل الدخول للمتابعة</p>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">اسم المستخدم</label>
+                    <input type="text" class="form-input" id="loginUsername" required autocomplete="username"
+                        placeholder="أدخل اسم المستخدم">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">كلمة المرور</label>
+                    <input type="password" class="form-input" id="loginPassword" required
+                        autocomplete="current-password" placeholder="أدخل كلمة المرور">
+                </div>
+                <button type="submit" class="login-btn">🔐 تسجيل الدخول</button>
+                <div id="loginError" class="login-error">❌ اسم المستخدم أو كلمة المرور غير صحيحة</div>
+            </form>
+        </div>
+    </div>
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -1090,6 +1229,9 @@
             <div class="user-info">
                 <button class="sync-btn" onclick="fetchFromCloud()" title="تحديث من السحاب">
                     ☁️ مزامنة سحابية
+                </button>
+                <button class="logout-btn" onclick="handleLogout()" title="تسجيل الخروج">
+                    🚪 خروج
                 </button>
                 <div class="user-avatar">AD</div>
                 <div class="user-details" style="color: white;">
@@ -1252,6 +1394,11 @@
                                     style="background:#f8f9fa; cursor: not-allowed;">
                             </div>
                             <div class="form-group">
+                                <label class="form-label required">عدد أفراد الأسرة</label>
+                                <input type="number" class="form-input" id="familyMembers" placeholder="1" min="1"
+                                    value="1" required>
+                            </div>
+                            <div class="form-group">
                                 <label class="form-label">عدد الأصوات المبدئي</label>
                                 <input type="number" class="form-input" id="initialVotes" placeholder="0" min="0"
                                     value="0">
@@ -1306,6 +1453,7 @@
                                 <tr>
                                     <th>اسم الزوج</th>
                                     <th>الرقم القومي</th>
+                                    <th>أفراد الأسرة</th>
                                     <th>عدد الأطفال</th>
                                     <th>الدخل</th>
                                     <th>الحالة</th>
@@ -1754,28 +1902,44 @@
         function loadData() {
             const savedData = localStorage.getItem('charityDB');
             if (savedData) {
-                database = JSON.parse(savedData);
-                // Initialize categories if not present
-                if (!database.categories) {
-                    database.categories = [
-                        { id: 'general', name: 'عام' },
-                        { id: 'widows', name: 'أرامل' },
-                        { id: 'orphans', name: 'أيتام' }
-                    ];
+                try {
+                    const parsed = JSON.parse(savedData);
+                    database = { ...database, ...parsed }; // Merge with defaults
+                } catch (e) {
+                    console.error("Local storage corrupt, resetting to defaults.");
                 }
-                // Initialize aidTypes if not present
-                if (!database.aidTypes) {
-                    database.aidTypes = [];
-                }
-                updateDashboard();
-                renderCasesTable();
-                renderVotingTable();
-                renderCategoriesSelect();
-                renderAidTypeSelect();
-            } else {
-                renderCategoriesSelect();
-                renderAidTypeSelect();
             }
+
+            // Ensure defaults
+            if (!database.categories || database.categories.length === 0) {
+                database.categories = [
+                    { id: 'general', name: 'عام' },
+                    { id: 'widows', name: 'أرامل' },
+                    { id: 'orphans', name: 'أيتام' }
+                ];
+            }
+            if (!database.aidTypes) database.aidTypes = [];
+            if (!database.cases) database.cases = [];
+
+            // Migration: Add familyMembers default for existing cases
+            database.cases.forEach(c => {
+                if (c.familyMembers === undefined || c.familyMembers === null) {
+                    c.familyMembers = 1;
+                }
+            });
+            // Save migration changes
+            localStorage.setItem('charityDB', JSON.stringify(database));
+
+            // Initial UI Render
+            refreshAllUI();
+        }
+
+        function refreshAllUI() {
+            updateDashboard();
+            renderCasesTable();
+            renderVotingTable();
+            renderCategoriesSelect();
+            renderAidTypeSelect();
         }
 
         // Save data to localStorage and Cloud
@@ -1817,32 +1981,34 @@
         }
 
         async function fetchFromCloud() {
-            showSyncStatus('loading', 'جاري جلب البيانات من السحاب...');
+            showSyncStatus('loading', 'جاري جلب البيانات من السحاب وتحديثها...');
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL);
+                if (!response.ok) throw new Error('Network error');
                 const cloudData = await response.json();
 
-                if (cloudData && cloudData.cases) {
-                    // --- SMART LOCAL MERGE ---
-                    // Instead of overwriting (database = cloudData), we merge to prevent losing local unsynced data
+                if (cloudData) {
+                    let changed = false;
 
-                    // 1. Merge Cases
-                    cloudData.cases.forEach(cloudCase => {
-                        const existingIndex = database.cases.findIndex(c => c.id === cloudCase.id);
-                        if (existingIndex > -1) {
-                            // Update existing case with cloud data (cloud is truth for existing cases)
-                            database.cases[existingIndex] = cloudCase;
-                        } else {
-                            // Add new case from cloud
-                            database.cases.push(cloudCase);
-                        }
-                    });
+                    // 1. Optimized Merge Cases using Map (O(N))
+                    if (cloudData.cases && cloudData.cases.length > 0) {
+                        const localMap = new Map(database.cases.map(c => [c.id, c]));
+                        cloudData.cases.forEach(cloudCase => {
+                            const local = localMap.get(cloudCase.id);
+                            if (!local || JSON.stringify(local) !== JSON.stringify(cloudCase)) {
+                                localMap.set(cloudCase.id, cloudCase);
+                                changed = true;
+                            }
+                        });
+                        database.cases = Array.from(localMap.values());
+                    }
 
                     // 2. Merge Categories
                     if (cloudData.categories) {
                         cloudData.categories.forEach(cloudCat => {
                             if (!database.categories.some(c => c.id === cloudCat.id)) {
                                 database.categories.push(cloudCat);
+                                changed = true;
                             }
                         });
                     }
@@ -1850,29 +2016,27 @@
                     // 3. Merge Aid Types
                     if (cloudData.aidTypes) {
                         cloudData.aidTypes.forEach(type => {
-                            if (!database.aidTypes.includes(type)) {
+                            const typeName = typeof type === 'string' ? type : type.name;
+                            if (!database.aidTypes.some(t => (typeof t === 'string' ? t : t.name) === typeName)) {
                                 database.aidTypes.push(type);
+                                changed = true;
                             }
                         });
                     }
 
-                    // Save the merged result locally
-                    localStorage.setItem('charityDB', JSON.stringify(database));
+                    if (changed) {
+                        localStorage.setItem('charityDB', JSON.stringify(database));
+                        refreshAllUI();
+                        console.log("Database updated from cloud.");
+                    }
 
-                    // Refresh UI
-                    updateDashboard();
-                    renderCasesTable();
-                    renderVotingTable();
-                    renderCategoriesSelect();
-                    renderAidTypeSelect();
-
-                    showAlert('success', '✅ تم جلب البيانات وتحديثها بنجاح');
+                    showSyncStatus('success', 'تمت المزامنة بنجاح ✅');
                 }
             } catch (error) {
                 console.error('Fetch Error:', error);
-                showAlert('error', '❌ فشل جلب البيانات من السحاب');
+                showSyncStatus('error', 'فشل جلب البيانات ❌');
             } finally {
-                hideSyncStatus();
+                setTimeout(() => hideSyncStatus(), 2000);
             }
         }
 
@@ -2144,6 +2308,7 @@
                 incomeSource: document.getElementById('incomeSource').value,
                 birthYear: document.getElementById('birthYear').value,
                 age: document.getElementById('age').value,
+                familyMembers: parseInt(document.getElementById('familyMembers').value) || 1,
                 category: document.getElementById('caseCategory').value,
                 generalNotes: document.getElementById('generalNotes').value,
                 children: children,
@@ -2323,6 +2488,7 @@
                 tr.innerHTML = `
                     <td>${caseItem.husbandName}</td>
                     <td>${caseItem.husbandID}</td>
+                    <td>${caseItem.familyMembers || 1}</td>
                     <td>${caseItem.children.length}</td>
                     <td>${caseItem.totalIncome} جنيه</td>
                     <td>
@@ -2422,6 +2588,7 @@
                 <div class="form-grid">
                     <div><strong>اسم الزوج:</strong> ${caseItem.husbandName}</div>
                     <div><strong>الرقم القومي:</strong> ${caseItem.husbandID}</div>
+                    <div><strong>عدد أفراد الأسرة:</strong> ${caseItem.familyMembers || 1}</div>
                     <div><strong>اسم الزوجة:</strong> ${caseItem.wifeName || '-'}</div>
                     <div><strong>رقم الهاتف:</strong> ${caseItem.phone}</div>
                     <div><strong>نوع السكن:</strong> ${caseItem.housingType}</div>
@@ -2494,6 +2661,7 @@
             document.getElementById('incomeSource').value = caseItem.incomeSource || '';
             document.getElementById('birthYear').value = caseItem.birthYear || '';
             document.getElementById('age').value = caseItem.age || '';
+            document.getElementById('familyMembers').value = caseItem.familyMembers || 1;
             document.getElementById('caseCategory').value = caseItem.category || '';
             document.getElementById('generalNotes').value = caseItem.generalNotes || '';
 
@@ -3392,8 +3560,68 @@
             }, 3000);
         }
 
+        // ==============================
+        // AUTHENTICATION SYSTEM
+        // ==============================
+
+        // Default admin credentials (password: admin123)
+        const ADMIN_USERNAME = 'admin';
+        // SHA-256 hash of 'admin123'
+        const ADMIN_PASSWORD_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9';
+
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
+        function checkAuth() {
+            const isLoggedIn = sessionStorage.getItem('charityAuth');
+            const overlay = document.getElementById('loginOverlay');
+            if (isLoggedIn === 'true') {
+                overlay.classList.add('hidden');
+            } else {
+                overlay.classList.remove('hidden');
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+
+            const passwordHash = await sha256(password);
+
+            if (username === ADMIN_USERNAME && passwordHash === ADMIN_PASSWORD_HASH) {
+                sessionStorage.setItem('charityAuth', 'true');
+                document.getElementById('loginOverlay').classList.add('hidden');
+                errorEl.classList.remove('show');
+                // Clear form
+                document.getElementById('loginUsername').value = '';
+                document.getElementById('loginPassword').value = '';
+            } else {
+                errorEl.classList.add('show');
+                // Shake animation
+                const card = document.querySelector('.login-card');
+                card.style.animation = 'none';
+                card.offsetHeight; // trigger reflow
+                card.style.animation = 'slideUp 0.3s ease-out';
+            }
+        }
+
+        function handleLogout() {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                sessionStorage.removeItem('charityAuth');
+                document.getElementById('loginOverlay').classList.remove('hidden');
+            }
+        }
+
         // Initialize
         window.addEventListener('load', function () {
+            checkAuth();
             loadData();
             // Auto-fetch from cloud on startup to sync multiple devices
             setTimeout(() => {
@@ -3804,6 +4032,7 @@
                                 age: impCase.age || "",
                                 category: impCase.category || "general",
                                 generalNotes: impCase.generalNotes || "",
+                                familyMembers: parseInt(impCase.familyMembers) || 1,
                                 children: impCase.children || [],
                                 customFields: impCase.customFields || [],
                                 receivedHistory: impCase.receivedHistory || [],

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>جمعية تنمية المجتمع بالرحمانية</title>
+    <link rel="icon" href="logo association.jpeg">
     <link
         href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Tajawal:wght@400;500;700&display=swap"
         rel="stylesheet">
@@ -18,28 +19,32 @@
         }
 
         :root {
-            --primary: #1976D2;
-            /* Blue */
-            --primary-dark: #1565C0;
-            /* Darker Blue */
-            --primary-light: #e3f2fd;
-            /* Very Light Blue */
-            --secondary: #FB8C00;
-            /* Orange */
-            --accent: #d32f2f;
-            /* Red */
-            --success: #2e7d32;
-            /* Green */
-            --warning: #f57c00;
-            /* Orange-Yellow */
-            --bg-main: #f5f7fa;
-            /* Light Gray BG */
+            --primary: #1e3a8a;
+            /* Deep Royal Blue */
+            --primary-dark: #1e40af;
+            /* Darker Navy */
+            --primary-light: #e0f2fe;
+            /* Very Light Sky Blue */
+            --secondary: #0ea5e9;
+            /* Bright Cyan */
+            --accent: #f59e0b;
+            /* Warm Amber */
+            --success: #10b981;
+            /* Emerald Green */
+            --warning: #f97316;
+            /* Soft Orange */
+            --bg-main: #f8fafc;
+            /* Cool Gray BG */
             --bg-card: #ffffff;
-            --text-primary: #2c3e50;
-            --text-secondary: #7f8c8d;
-            --border: #e0e0e0;
-            --shadow: rgba(0, 0, 0, 0.08);
-            /* Neutral shadow */
+            /* Pure White */
+            --text-primary: #0f172a;
+            /* Dark Slate Blue */
+            --text-secondary: #64748b;
+            /* Muted Slate Gray */
+            --border: #e2e8f0;
+            /* Soft Slate Border */
+            --shadow: rgba(30, 58, 138, 0.05);
+            /* Corporate Blue shadow */
         }
 
         body {
@@ -1490,6 +1495,7 @@
                                 <tr>
                                     <th>اسم الحالة</th>
                                     <th>الرقم القومي</th>
+                                    <th>أفراد الأسرة</th>
                                     <th>عدد الأطفال</th>
                                     <th>الدخل</th>
                                     <th>الحالة</th>
@@ -1591,6 +1597,7 @@
                                     <th>#</th>
                                     <th>اسم الحالة</th>
                                     <th>الرقم القومي</th>
+                                    <th>أفراد الأسرة</th>
                                     <th>عدد الأطفال</th>
                                     <th>رقم الهاتف</th>
                                     <th>الأيتام</th>
@@ -1678,6 +1685,7 @@
                                         <th>اسم الحالة</th>
                                         <th>رقم الهاتف</th>
                                         <th>الرقم القومي</th>
+                                        <th>أفراد الأسرة</th>
                                         <th>الإجراء</th>
                                     </tr>
                                 </thead>
@@ -1698,6 +1706,7 @@
                                         <th>اسم الحالة</th>
                                         <th>رقم الهاتف</th>
                                         <th>الرقم القومي</th>
+                                        <th>أفراد الأسرة</th>
                                         <th>تاريخ التسليم</th>
                                         <th>الإجراء</th>
                                     </tr>
@@ -2726,6 +2735,7 @@
                         id: c.id,
                         name: c.husbandName,
                         idNumber: c.husbandID,
+                        familyMembers: c.familyMembers || 1,
                         childCount: c.children.length,
                         income: c.totalIncome,
                         original: c
@@ -2745,6 +2755,7 @@
                                 name: `👶 طفل: ${child.name}`,
                                 parentName: c.husbandName,
                                 idNumber: `${c.husbandID} (ولي الأمر)`,
+                                familyMembers: c.familyMembers || 1,
                                 childCount: '-',
                                 income: c.totalIncome,
                                 original: child
@@ -2755,7 +2766,7 @@
             }
 
             if (pendingItems.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center">لا توجد حالات أو أطفال معلقين (قيد الانتظار)</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">لا توجد حالات أو أطفال معلقين (قيد الانتظار)</td></tr>';
                 renderPaginationControls('votingPagination', 0, 1, () => { });
                 return;
             }
@@ -2772,6 +2783,7 @@
                             <div style="font-size:0.75rem; color:var(--text-secondary);">أسرة مستقلة</div>
                         </td>
                         <td>${item.idNumber}</td>
+                        <td>${item.familyMembers}</td>
                         <td>${item.childCount}</td>
                         <td>${item.income} جنيه</td>
                         <td><span class="status-badge status-pending">قيد الانتظار</span></td>
@@ -2786,6 +2798,7 @@
                             <div style="font-size:0.75rem; color:var(--text-secondary);">ولي الأمر: ${item.parentName}</div>
                         </td>
                         <td>${item.idNumber}</td>
+                        <td>${item.familyMembers}</td>
                         <td>-</td>
                         <td>${item.income} جنيه</td>
                         <td><span class="status-badge status-pending">قيد الانتظار</span></td>
@@ -3019,14 +3032,15 @@
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${nameCellContent}</td>
-                    <td>${item.case.husbandID}</td>
-                    <td>${item.case.children ? item.case.children.length : 0}</td>
-                    <td>${item.case.phone || '-'}</td>
-                    <td>${isOrphan(item.case) ? 'نعم' : 'لا'}</td>
-                    <td>${getStatusText(item.case.status)}</td>
-                `;
+                        <td>${index + 1}</td>
+                        <td>${nameCellContent}</td>
+                        <td>${item.case.husbandID}</td>
+                        <td>${item.case.familyMembers || 1}</td>
+                        <td>${item.case.children ? item.case.children.length : 0}</td>
+                        <td>${item.case.phone || '-'}</td>
+                        <td>${isOrphan(item.case) ? 'نعم' : 'لا'}</td>
+                        <td>${getStatusText(item.case.status)}</td>
+                    `;
                 tbody.appendChild(tr);
             });
 
@@ -3251,6 +3265,7 @@
                         <td>${item.case.husbandName}</td>
                         <td>${item.case.phone}</td>
                         <td>${item.case.husbandID}</td>
+                        <td>${item.case.familyMembers || 1}</td>
                         <td>
                             <button class="btn btn-primary btn-sm" onclick="deliverAid(${item.case.id}, '${selectedType}', null)">
                                 📦 تسليم
@@ -3265,6 +3280,7 @@
                         </td>
                         <td>${item.case.phone}</td>
                         <td>${item.case.husbandID} (ولي الأمر)</td>
+                        <td>${item.case.familyMembers || 1}</td>
                         <td>
                             <button class="btn btn-primary btn-sm" onclick="deliverAid(${item.case.id}, '${selectedType}', '${item.child.name}')">
                                 📦 تسليم للطفل
@@ -3289,6 +3305,7 @@
                         <td>${item.case.husbandName}</td>
                         <td>${item.case.phone}</td>
                         <td>${item.case.husbandID}</td>
+                        <td>${item.case.familyMembers || 1}</td>
                         <td>${new Date(item.record.date).toLocaleDateString('ar-EG')}</td>
                         <td>
                             <button class="btn btn-danger btn-sm" title="إلغاء الاستلام" onclick="cancelAidDelivery(${item.case.id}, '${selectedType}', null)">
@@ -3304,6 +3321,7 @@
                         </td>
                         <td>${item.case.phone}</td>
                         <td>${item.case.husbandID} (ولي الأمر)</td>
+                        <td>${item.case.familyMembers || 1}</td>
                         <td>${new Date(item.record.date).toLocaleDateString('ar-EG')}</td>
                         <td>
                             <button class="btn btn-danger btn-sm" title="إلغاء الاستلام" onclick="cancelAidDelivery(${item.case.id}, '${selectedType}', '${item.child.name}')">
@@ -3422,6 +3440,7 @@
                             reportData.push({
                                 husbandName: c.husbandName,
                                 nationalID: c.husbandID,
+                                familyMembers: c.familyMembers || 1,
                                 phone: c.phone,
                                 aidType: h.type,
                                 date: hDate
@@ -3449,6 +3468,7 @@
                                         <th>اسم المستفيد</th>
                                         <th>رقم الهاتف</th>
                                         <th>الرقم القومي</th>
+                                        <th>أفراد الأسرة</th>
                                         <th>تاريخ الاستلام</th>
                                     </tr>
                                 </thead>
@@ -3458,6 +3478,7 @@
                                             <td>${d.husbandName}</td>
                                             <td>${d.phone}</td>
                                             <td>${d.nationalID}</td>
+                                            <td>${d.familyMembers || 1}</td>
                                             <td>${d.date.toLocaleDateString('ar-EG')}</td>
                                         </tr>
                                     `).join('')}
